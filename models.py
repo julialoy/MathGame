@@ -11,12 +11,12 @@ class BaseModel(Model):
 
 
 class User(UserMixin, BaseModel):
-    username = CharField(Unique=True)
+    username = CharField(unique=True)
     password = CharField(max_length=25)
     is_admin = BooleanField(default=False)
 
     @classmethod
-    def create_user(cls, username, password, admin):
+    def create_user(cls, username, password, admin=False):
         try:
             with DATABASE.transaction():
                 cls.create(
@@ -42,7 +42,7 @@ class User(UserMixin, BaseModel):
 class Score(BaseModel):
     # Tracks how many quizes user has taken and type (addition, subtraction, etc.)
     # Type should be a different model?
-    user = ForeignKeyField(User)
+    user = ForeignKeyField(User, unique=True)
     total_quiz_num = IntegerField
     total_questions_correct = IntegerField
     total_questions_wrong = IntegerField
@@ -51,5 +51,5 @@ class Score(BaseModel):
 
 def initialize():
     DATABASE.connect()
-    DATABASE.create_tables([User], safe=True)
+    DATABASE.create_tables([User, Score], safe=True)
     DATABASE.close()

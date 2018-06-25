@@ -1,11 +1,12 @@
 import operator, random
-from flask import Flask, jsonify, render_template, request, url_for
+from flask import Flask, g, jsonify, redirect, render_template, request, url_for
 from flask_bcrypt import check_password_hash
 from flask_login import (current_user, LoginManager, login_required, login_user, logout_user, UserMixin)
 
 import models
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'dshfjkrehtuia^&#C@@%&*(fdsh21243254235'
 DEBUG = True
 
 login_manager = LoginManager()
@@ -47,7 +48,6 @@ class CreateMathFacts:
         self.neg_answers = neg_answers
         self.start_num = start_num
         self.end_num = end_num
-
 
     math_operators = {"+": operator.add,
                       "-": operator.sub,
@@ -109,16 +109,16 @@ TESTMATHFACTS = CreateMathFacts().create_facts()
 EXAMPLETEST = Test("Kindergarten Math Facts", TESTMATHFACTS, 10)
 
 @login_manager.user_loader
-def load_user(username):
+def load_user(id):
     try:
-        return models.User.get(models.User.username==username)
+        return models.User.get(models.User.id==id)
     except models.DoesNotExist:
         return None
 
 @app.before_request
 def before_request():
     g.db = models.DATABASE
-    g.db.get_conn()
+    g.db.connection()
     g.user = current_user
 
 @app.after_request
@@ -131,20 +131,65 @@ def index():
     # Add button to create new addition test if logged in.
     # Add login/logout
     # Add register (w/javascript)
-
-    test = EXAMPLETEST
-    return render_template('index.html', test=test)
+    if not current_user.is_authenticated:
+        return render_template('login.html')
+    else:
+        test = EXAMPLETEST
+        return render_template('index.html', test=test)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    pass
+    user_info = request.form
+    username = user_info['username']
+    password = user_info['password']
+    try:
+        user = models.User.get(models.User.username == username)
+    except models.DoesNotExist:
+        return jsonify(msg="That username or password is incorrect.")
+    else:
+        if check_password_hash(user.password, password):
+            login_user(user)
+            print(current_user)
+            return redirect(url_for('index'))
+        else:
+            return jsonify(msg="That username or password is incorrect.")
+
 
 @app.route("/logout")
 @login_required
 def logout():
-    username = g.user.username
     logout_user()
-    return redirect(url_for('/'))
+    return render_template('login.html')    # Redirect doesn't work here? Tries to submit form?
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.form:
+        user_reg = request.form
+        username = user_reg['username']
+        password = user_reg['password']
+        try:
+            models.User.create_user(
+                username=username,
+                password=password
+            )
+            models.Score.create(
+                user=models.User.get(models.User.username == username),
+                total_quiz_num="",
+                total_questions_correct="",
+                total_questions_wrong="",
+            )
+        except ValueError:
+            return jsonify(msg="That username already exists.")
+        else:
+            return jsonify(redirect(url_for('index')))
+    else:
+        return render_template('register.html')
+
+@app.route("/startquiz", methods=["GET", "POST"])
+@login_required
+def startquiz():
+    pass
 
 @app.route("/question", methods=["GET"])
 def question():
@@ -152,6 +197,7 @@ def question():
         return jsonify(question=EXAMPLETEST.grab_question())
     else:
         return jsonify(question="End of Quiz!")
+
 
 @app.route("/checkanswer", methods=["GET", "POST"])
 def checkanswer():
@@ -164,8 +210,7 @@ def checkanswer():
         return jsonify(answer="Sorry! That's not the right answer.")
 
 
-
 if __name__ == '__main__':
+    models.initialize()
     app.run(debug=DEBUG)
-
 

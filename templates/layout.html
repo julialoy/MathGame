@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>Math Quiz!</title>
+    <link href="/static/mathgame.css" rel="stylesheet">
+</head>
+
+<body>
+<header>
+    <!-- <div class="container d-flex justify-content-center">
+        <h1 class="text-info py-5">Math Quiz!</h1>
+    </div> -->
+</header>
+
+<main role="main" class="container">
+    {% block content %} {% endblock %}
+</main>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script type="text/javascript">
+
+ $.ajax({url:"/question", dataType:"json"}).then((data) => {
+      $("#quiz-question").append(`<h3>${data.question}</h3>`);
+    });
+
+    /*
+    $('#signin-form').submit(function(evt) {
+      evt.preventDefault();
+      console.log("Signin submitted");
+      var url = $(this).attr('action');
+      var username = $('#inputUsername').val();
+      console.log(username);
+      var password = $('#inputPassword').val();
+      console.log(password);
+      $.ajax(url, {
+        dataType: "json",
+        data: {"username": username, "password": password},
+        type: "POST",
+      }).then((data) => {;
+        alert(data.msg);
+        $('#inputUsername').val("");
+        $('#inputPassword').val("");
+      });
+    });*/
+
+    $('#register-form').submit(function(evt) {
+      evt.preventDefault();
+      console.log("Registration submitted");
+      var url = $(this).attr('action');
+      var username = $('#createUsername').val();
+      console.log(username);
+      var password = $('#createPassword').val();
+      console.log(password);
+      var confirmPassword = $('#confirmPassword').val();
+      if (password !== confirmPassword) {
+        alert("Those passwords do not match.");
+        $('#createUsername').val("");
+        $('#createPassword').val("");
+        $('#confirmPassword').val("");
+      } else if (password === confirmPassword) {
+          $.ajax(url, {
+            dataType: "json",
+            data: {"username": username, "password": password, "confirm-password": confirmPassword},
+            type: "POST",
+            success: function(data, textStatus) {
+              console.log("Success");
+              console.log(data);
+              if (data.redirect) {
+                window.location.href = data.redirect;
+              } else {
+                alert(data.msg);
+                $('#createUsername').val("");
+                $('#createPassword').val("");
+                $('#confirmPassword').val("");
+              }
+            }
+          });
+      }
+
+    });
+
+    $('#user-answer').submit(function(evt) {
+      evt.preventDefault();
+      var url = $(this).attr("action");
+      var question = $('h3').text();
+      var userAnswer = $('#user-answer-text').val();
+      $.ajax(url, {
+        dataType: "json",
+        data: {"question": question, "userAnswer": userAnswer},
+        type: "POST",
+      }).then((data) => {
+        $("#quiz-answer").append(data.answer);
+        console.log(data.answer);
+        $('#user-answer-text').val("");
+      });
+    });
+</script>
+</body>
+</html>

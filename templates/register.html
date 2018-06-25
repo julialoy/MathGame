@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+<form class="form-signin" id="register-form" action="{{ url_for('register') }}">
+    <div class="text-center mb-4">
+        <h1 class="h3 mb-3 font-weight-normal text-info">Math Quiz!</h1>
+    </div>
+
+    <div class="form-label-group">
+        <input type="text" id="createUsername" class="form-control" placeholder="Username" name="create-username" required autofocus>
+        <label for="createUsername">Pick username</label>
+    </div>
+
+    <div class="form-label-group">
+        <input type="password" id="createPassword" class="form-control" placeholder="Enter Password" name="create-password" required>
+        <label for="createPassword">Enter Password</label>
+    </div>
+
+    <div class="form-label-group">
+        <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm Password" name="confirm-password" required>
+        <label for="confirmPassword">Confirm Password</label>
+    </div>
+
+    <button class="btn btn-lg btn-info btn-block" type="submit" name="register-btn">Register!</button>
+    <p class="mt-5 mb-3 text-center text-info">
+        Already have an account? <a class="text-info" href="{{ url_for('index') }}">Click Here</a>
+    </p>
+</form>
+
+{% endblock %}
