@@ -13,15 +13,17 @@ class BaseModel(Model):
 class User(UserMixin, BaseModel):
     username = CharField(unique=True)
     password = CharField(max_length=25)
+    current_quiz = TextField(default="[]")
     is_admin = BooleanField(default=False)
 
     @classmethod
-    def create_user(cls, username, password, admin=False):
+    def create_user(cls, username, password, current_quiz="[]", admin=False):
         try:
             with DATABASE.transaction():
                 cls.create(
                     username=username,
                     password=generate_password_hash(password),
+                    current_quiz=current_quiz,
                     is_admin=admin
                 )
         except IntegrityError:
