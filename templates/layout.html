@@ -100,6 +100,16 @@
         $('#user-answer-text').val("");
       });
     });
+
+    $('#get-next-btn').on('click', function() {
+      console.log("Next btn clicked");
+      $('#quiz-question').empty();
+      $('#quiz-answer').empty();
+      $.ajax({url:"/question", dataType:"json"}).then((data) => {
+        $("#quiz-question").append(`<h3>${data.question}</h3>`);
+      });
+      $('#user-answer-text').focus();
+    });
 </script>
 </body>
 </html>
