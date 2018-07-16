@@ -44,10 +44,10 @@ class User(UserMixin, BaseModel):
 class Score(BaseModel):
     # Tracks how many quizes user has taken and type (addition, subtraction, etc.)
     # Type should be a different model?
-    user = ForeignKeyField(User, unique=True)
-    total_quiz_num = IntegerField
-    total_questions_correct = IntegerField
-    total_questions_wrong = IntegerField
+    user_id = ForeignKeyField(User, unique=True)
+    total_quiz_num = IntegerField(default=0)
+    total_questions_correct = IntegerField(default=0)
+    total_questions_wrong = IntegerField(default=0)
 
 
 

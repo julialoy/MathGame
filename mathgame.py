@@ -182,10 +182,10 @@ def register():
                 password=password
             )
             models.Score.create(
-                user=models.User.get(models.User.username == username),
-                total_quiz_num="",
-                total_questions_correct="",
-                total_questions_wrong="",
+                user_id=models.User.get(models.User.username == username),
+                total_quiz_num=0,
+                total_questions_correct=0,
+                total_questions_wrong=0,
             )
         except ValueError:
             return jsonify(msg="That username already exists.")
@@ -202,6 +202,10 @@ def startquiz():
     session['current_facts'] = new_test.test_questions_answers
     session['current_quiz'] = new_test.test_questions
    # print(session['current_quiz'])
+    q = (models.Score
+         .update({models.Score.total_quiz_num: models.Score.total_quiz_num + 1})
+         .where(models.Score.user_id == current_user.id))
+    q.execute()
     return redirect(url_for('index'))
 
 
@@ -229,8 +233,16 @@ def checkanswer():
     quiz_question = data['question']
     user_answer = int(data['userAnswer'])
     if user_answer == session['current_facts'][quiz_question]:
+        q = (models.Score
+             .update({models.Score.total_questions_correct: models.Score.total_questions_correct + 1})
+             .where(models.Score.user_id == current_user.id))
+        q.execute()
         return jsonify(answer="CORRECT!")
     else:
+        q = (models.Score
+             .update({models.Score.total_questions_wrong: models.Score.total_questions_wrong + 1})
+             .where(models.Score.user_id == current_user.id))
+        q.execute()
         return jsonify(answer="Sorry! That's not the right answer.")
 
 

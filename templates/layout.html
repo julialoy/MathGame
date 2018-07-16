@@ -25,9 +25,13 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <script type="text/javascript">
 
- $.ajax({url:"/question", dataType:"json"}).then((data) => {
+$.ajax({url:"/question", dataType:"json"}).then((data) => {
       $("#quiz-question").append(`<h3>${data.question}</h3>`);
-    });
+      if (data.question === "You haven't started a quiz!" || data.question === "End of Quiz!") {
+        $('#user-answer').hide();
+        $('#get-next-btn').hide();
+      }
+   });
 
     /*
     $('#signin-form').submit(function(evt) {
@@ -85,6 +89,7 @@
 
     });
 
+
     $('#user-answer').submit(function(evt) {
       evt.preventDefault();
       var url = $(this).attr("action");
@@ -96,17 +101,22 @@
         type: "POST",
       }).then((data) => {
         $("#quiz-answer").append(data.answer);
-        console.log(data.answer);
+        $('#user-answer').hide();
         $('#user-answer-text').val("");
+        $('#get-next-btn').focus();
       });
     });
 
     $('#get-next-btn').on('click', function() {
-      console.log("Next btn clicked");
       $('#quiz-question').empty();
       $('#quiz-answer').empty();
+      $('#user-answer').show();
       $.ajax({url:"/question", dataType:"json"}).then((data) => {
         $("#quiz-question").append(`<h3>${data.question}</h3>`);
+        if (data.question === "You haven't started a quiz!" || data.question === "End of Quiz!") {
+          $('#user-answer').hide();
+          $('#get-next-btn').hide();
+        };
       });
       $('#user-answer-text').focus();
     });
