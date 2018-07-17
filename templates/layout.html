@@ -75,8 +75,8 @@ $.ajax({url:"/question", dataType:"json"}).then((data) => {
             success: function(data, textStatus) {
               console.log("Success");
               console.log(data);
-              if (data.redirect) {
-                window.location.href = data.redirect;
+              if (response) {
+                window.location.href = data.url;
               } else {
                 alert(data.msg);
                 $('#createUsername').val("");
@@ -113,9 +113,14 @@ $.ajax({url:"/question", dataType:"json"}).then((data) => {
       $('#user-answer').show();
       $.ajax({url:"/question", dataType:"json"}).then((data) => {
         $("#quiz-question").append(`<h3>${data.question}</h3>`);
-        if (data.question === "You haven't started a quiz!" || data.question === "End of Quiz!") {
+        if (data.question === "You haven't started a quiz!") {
           $('#user-answer').hide();
           $('#get-next-btn').hide();
+        } else if (data.question === "End of Quiz!") {
+          $('#user-answer').hide();
+          $('#get-next-btn').hide();
+          $('#quiz-question').append(`<p>You have answered ${data.correct} questions correctly!</p>`);
+          $('#quiz-question').append(`<p>You have answered ${data.wrong} questions incorrectly.</p>`);
         };
       });
       $('#user-answer-text').focus();

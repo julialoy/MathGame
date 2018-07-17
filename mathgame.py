@@ -190,9 +190,9 @@ def register():
         except ValueError:
             return jsonify(msg="That username already exists.")
         else:
-            return jsonify(redirect(url_for('index')))
+            return jsonify(url="/login")
     else:
-        return render_template('register.html')
+        return jsonify(url="/register")
 
 
 @app.route("/startquiz", methods=["GET", "POST"])
@@ -224,7 +224,12 @@ def question():
            # print("QUIZ AFTER POP", session['current_quiz'])
             return jsonify(question=new_question)
         else:
-            return jsonify(question="End of Quiz!")
+            q = (models.Score.select()
+                             .join(models.User, on=(models.Score.user_id == models.User.id))
+                             .where(models.User.id == current_user.id))
+            total_correct = [num.total_questions_correct for num in q]
+            total_wrong = [num.total_questions_wrong for num in q]
+            return jsonify(question="End of Quiz!", correct=total_correct, wrong=total_wrong)
 
 
 @app.route("/checkanswer", methods=["GET", "POST"])
