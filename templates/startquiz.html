@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+<form class="form-signin" id="start-quiz-form">
+    <div class="text-center mb-4">
+        <h1 class="h3 mb-3 font-weight-normal text-info">Set Up Quiz</h1>
+    </div>
+
+    <div class="form-check">
+        <h3 class="h5 font-weight-normal text-info">Select Math Fact Types</h3>
+      <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1">
+          <label class="form-check-label" for="inlineCheckbox1">Addition</label>
+      </div>
+      <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2">
+          <label class="form-check-label" for="inlineCheckbox1">Subtraction</label>
+      </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
+          <label class="form-check-label" for="inlineCheckbox1">Multiplication</label>
+      </div>
+        <button class="btn btn-sm btn-info btn-block" type="submit" name="fact-type-btn">Select Facts</button>
+    </div>
+</form>
+
+{% endblock %}

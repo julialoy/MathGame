@@ -16,10 +16,10 @@
         <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required>
         <label for="inputPassword">Password</label>
     </div>
-    <button class="btn btn-lg btn-info btn-block" type="submit" name="signin-btn">Sign in</button>
+    <button class="btn btn-lg btn-info btn-block" type="submit" name="signin-btn" id="signin-btn">Sign in</button>
+
+</form>
     <p class="mt-5 mb-3 text-center">
         <a class="text-info" href="{{ url_for('register') }}">Register</a>
     </p>
-</form>
-
 {% endblock %}

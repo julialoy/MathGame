@@ -192,16 +192,16 @@ def register():
         else:
             return jsonify(url="/login")
     else:
-        return jsonify(url="/register")
+        return render_template('register.html')
 
 
 @app.route("/startquiz", methods=["GET", "POST"])
 @login_required
 def startquiz():
+#  return render_template('startquiz.html')
     new_test = Test("Kindergarten Addition Math Facts", CreateMathFacts().create_facts(), 10)
     session['current_facts'] = new_test.test_questions_answers
     session['current_quiz'] = new_test.test_questions
-   # print(session['current_quiz'])
     q = (models.Score
          .update({models.Score.total_quiz_num: models.Score.total_quiz_num + 1})
          .where(models.Score.user_id == current_user.id))
@@ -217,11 +217,8 @@ def question():
         return jsonify(question="You haven't started a quiz!")
     else:
         if len(session['current_quiz']) >= 1:
-           # print("CURRENT_QUIZ", session['current_quiz'])
             new_question = session['current_quiz'].pop()
             session['current_quiz'] = session['current_quiz']
-           # print("POPPPED: ", len(session['current_quiz']))
-           # print("QUIZ AFTER POP", session['current_quiz'])
             return jsonify(question=new_question)
         else:
             q = (models.Score.select()

@@ -5,6 +5,7 @@ from peewee import *
 
 DATABASE = SqliteDatabase('mathgame.db')
 
+
 class BaseModel(Model):
     class Meta:
         database = DATABASE
@@ -41,9 +42,8 @@ class User(UserMixin, BaseModel):
     def is_anonymous(self):
         return False
 
+
 class Score(BaseModel):
-    # Tracks how many quizes user has taken and type (addition, subtraction, etc.)
-    # Type should be a different model?
     user_id = ForeignKeyField(User, unique=True)
     total_quiz_num = IntegerField(default=0)
     total_questions_correct = IntegerField(default=0)
