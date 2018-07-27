@@ -7,25 +7,6 @@ $.ajax({url:"/question", dataType:"json"}).then((data) => {
   }
 });
 
-//$('#signin-btn').submit(function(evt) {
-//  evt.preventDefault();
-//  console.log("Signin submitted");
-//  var url = $(this).attr('action');
-//  var username = $('#inputUsername').val();
-//  console.log(username);
-//  var password = $('#inputPassword').val();
-//  console.log(password);
-//  $.ajax(url, {
-//    dataType: "json",
-//    data: {"username": username, "password": password},
-//    type: "POST",
-//  }).then((data) => {;
-//    alert(data.msg);
-//    $('#inputUsername').val("");
-//    $('#inputPassword').val("");
-//  });
-//});
-
 $('#register-form').submit(function(evt) {
   console.log("Registration submitted");
   var url = $(this).attr('action');

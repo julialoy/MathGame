@@ -144,21 +144,23 @@ def index():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    user_info = request.form
-    username = user_info['username']
-    password = user_info['password']
-    try:
-        user = models.User.get(models.User.username == username)
-    except models.DoesNotExist:
-        return jsonify(msg="That username or password is incorrect.")
-    else:
-        if check_password_hash(user.password, password):
-            session['username'] = username
-            login_user(user)
-            return redirect(url_for('index'))
+    if request.form:
+        user_info = request.form
+        username = user_info['username']
+        password = user_info['password']
+        try:
+            user = models.User.get(models.User.username == username)
+        except models.DoesNotExist:
+            return jsonify(msg="That username or password is incorrect.")   # Remove
         else:
-            return jsonify(msg="That username or password is incorrect.")
-
+            if check_password_hash(user.password, password):
+                session['username'] = username
+                login_user(user)
+                return redirect(url_for('index'))
+            else:
+                return jsonify(msg="That username or password is incorrect.")   # Remove
+    else:
+        return render_template('login.html')
 
 @app.route("/logout")
 @login_required
@@ -176,6 +178,8 @@ def register():
         user_reg = request.form
         username = user_reg['username']
         password = user_reg['password']
+        print("USERNAME", username)
+        print("PASSWORD: ", password)
         try:
             models.User.create_user(
                 username=username,
@@ -187,10 +191,10 @@ def register():
                 total_questions_correct=0,
                 total_questions_wrong=0,
             )
+            return redirect(url_for('login'))
         except ValueError:
-            return jsonify(msg="That username already exists.")
-        else:
-            return jsonify(url="/login")
+            #return jsonify(msg="That username already exists.")
+            return render_template('register.html')
     else:
         return render_template('register.html')
 
