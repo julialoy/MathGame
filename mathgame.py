@@ -1,5 +1,5 @@
 import operator, random
-from flask import Flask, g, jsonify, redirect, render_template, request, session, sessions, url_for
+from flask import Flask, flash, g, jsonify, redirect, render_template, request, session, sessions, url_for
 from flask_bcrypt import check_password_hash
 from flask_login import (current_user, LoginManager, login_required, login_user, logout_user, UserMixin)
 
@@ -151,14 +151,18 @@ def login():
         try:
             user = models.User.get(models.User.username == username)
         except models.DoesNotExist:
-            return jsonify(msg="That username or password is incorrect.")   # Remove
+            #return jsonify(msg="That username or password is incorrect.")
+            flash("That username or password is incorrect. OMG BATS")
+            return render_template('login.html')
         else:
             if check_password_hash(user.password, password):
                 session['username'] = username
                 login_user(user)
                 return redirect(url_for('index'))
             else:
-                return jsonify(msg="That username or password is incorrect.")   # Remove
+                #return jsonify(msg="That username or password is incorrect.")
+                flash("That username or password is incorrect. OMG CATS")
+                return render_template('login.html')
     else:
         return render_template('login.html')
 
