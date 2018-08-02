@@ -21,6 +21,7 @@ $('#register-form').submit( evt => {
 });
 
 const nextQuestion = () => {
+  $('#game-container').addClass('bg-primary');
   $('#quiz-question').empty();
   $('#quiz-answer').empty();
   $('#user-answer').show();
@@ -48,11 +49,28 @@ $('#user-answer').submit( evt => {
     data: {"question": question, "userAnswer": userAnswer},
     type: "POST",
   }).then( data => {
-    $("#quiz-answer").append(data.answer);
-    $('#user-answer').hide();
-    $('#user-answer-text').val("");
-    //$('#get-next-btn').show().focus();
-    setTimeout(nextQuestion, 2000);
+    if (data.answer === "Try again! Please enter a number.") {
+      $('#quiz-answer').empty();
+      $("#quiz-answer").append(data.answer);
+      $('#user-answer-text').val("");
+    } else if (data.answer === "CORRECT!") {
+      $('#game-container').removeClass("bg-primary");
+      $('#game-container').css("background-color", "mediumseagreen");
+      $('#quiz-answer').empty();
+      $("#quiz-answer").append(data.answer);
+      $('#user-answer').hide();
+      $('#user-answer-text').val("");
+      setTimeout(nextQuestion, 2000);
+    } else if (data.answer === "Sorry! That's not the right answer.") {
+      $('#game-container').removeClass("bg-primary");
+      $('#game-container').css("background-color", "indianred");
+      $('#quiz-answer').empty();
+      $("#quiz-answer").append(data.answer);
+      $('#user-answer').hide();
+      $('#user-answer-text').val("");
+      setTimeout(nextQuestion, 2000);
+    }
+
   });
 });
 

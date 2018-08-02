@@ -19,6 +19,8 @@ body {
   background-color: #f5f5f5;
 }
 
+
+
 .form-signin {
   width: 100%;
   max-width: 420px;
@@ -83,7 +85,6 @@ body {
 }
 
 .nav-item {
-  color: tomato;
   padding-left: 1.5rem;
   padding-right: 1.5rem;
   padding-bottom: .25rem;

@@ -241,19 +241,24 @@ def question():
 def checkanswer():
     data = request.form
     quiz_question = data['question']
-    user_answer = int(data['userAnswer'])
-    if user_answer == session['current_facts'][quiz_question]:
-        q = (models.Score
-             .update({models.Score.total_questions_correct: models.Score.total_questions_correct + 1})
-             .where(models.Score.user_id == current_user.id))
-        q.execute()
-        return jsonify(answer="CORRECT!")
+    #user_answer = int(data['userAnswer'])
+    try:
+        user_answer = int(data['userAnswer'])
+    except ValueError:
+        return jsonify(answer="Try again! Please enter a number.")
     else:
-        q = (models.Score
-             .update({models.Score.total_questions_wrong: models.Score.total_questions_wrong + 1})
-             .where(models.Score.user_id == current_user.id))
-        q.execute()
-        return jsonify(answer="Sorry! That's not the right answer.")
+        if user_answer == session['current_facts'][quiz_question]:
+            q = (models.Score
+                 .update({models.Score.total_questions_correct: models.Score.total_questions_correct + 1})
+                 .where(models.Score.user_id == current_user.id))
+            q.execute()
+            return jsonify(answer="CORRECT!")
+        else:
+            q = (models.Score
+                 .update({models.Score.total_questions_wrong: models.Score.total_questions_wrong + 1})
+                 .where(models.Score.user_id == current_user.id))
+            q.execute()
+            return jsonify(answer="Sorry! That's not the right answer.")
 
 
 if __name__ == '__main__':
