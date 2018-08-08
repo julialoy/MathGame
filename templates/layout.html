@@ -16,12 +16,12 @@
 </header>
 
 <main role="main" class="container">
-    <div class="container">
+    <div class="row">
         {% with messages=get_flashed_messages() %}
         {% if messages %}
         <div class="alert alert-danger" role="alert">
             {% for message in messages %}
-            <div class="container">
+            <div class="col-sm" id="flash-message">
                 {{ message }}
             </div>
             {% endfor %}
@@ -30,7 +30,20 @@
         {% endwith %}
     </div>
     {% block content %} {% endblock %}
+<!--    <div class="container" id="character">
+        <div class="d-flex" id="eyes">
+            <div id="left-eye">
+                <div id="left-pupil"></div>
+            </div>
+            <div id="right-eye">
+                <div id="right-pupil"></div>
+            </div>
+        </div>
+        <div id="triangle"></div>
+    </div>-->
 </main>
+
+
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" crossorigin="anonymous"></script>

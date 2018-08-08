@@ -1,3 +1,10 @@
+# Add: User classes---e.g., student, teacher, administrator
+# Distinct functionality for different classes
+# Graphs to visually show progress over time
+# Help button to show ten frames?
+# Ten frames
+# Achievements with badges?
+
 import operator, random
 from flask import Flask, flash, g, jsonify, redirect, render_template, request, session, sessions, url_for
 from flask_bcrypt import check_password_hash
