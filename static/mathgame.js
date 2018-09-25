@@ -1,3 +1,8 @@
+//Store some info about the session
+const userSessionStorage = window.sessionStorage;
+
+
+//Fill two ten frames per the current quiz question
 const fillTenframe = () => {
   const testNumOne = $.trim($('#quiz-question').text());
   const numOne = testNumOne.split(" + ");
@@ -15,12 +20,10 @@ const fillTenframe = () => {
     const redSphereTwo = tableTwoCells[i].firstChild;
     redSphereTwo.setAttribute("style", "background-color:#17a2b8");
   }
-  //Need to loop through table cells and change color of sphere
-  //for (i = 0; i < tableCells.length; i++) {
-  //
-  //}
 };
 
+
+//Change to two empty ten frames
 const emptyTenframe = () => {
   const tableOne = document.getElementById('tenframe-table-one');
   const tableTwo = document.getElementById('tenframe-table-two');
@@ -34,16 +37,58 @@ const emptyTenframe = () => {
   }
 };
 
+//Get the next quiz question
+const nextQuestion = () => {
+  $('#game-container').css("background-color", "lightgrey");
+  $('#quiz-question').empty();
+  $('#quiz-answer').empty();
+  $('#quiz-question').show();
+  $('#user-answer').show();
+  emptyTenframe();
+  $('#show-tenframe').html('Show Ten Frame');
+  $.ajax({url:"/question", dataType:"json"}).then( data => {
+    $('#get-next-btn').hide();
+    if (data.question === "You haven't started a quiz!") {
+      $('#quiz-question').append(`<h3>${data.question}</h3>`)
+      $('#user-answer').hide();
+      $('#show-tenframe').hide();
+    } else if (data.question === "End of Quiz!") {
+      $('#quiz-question').append(`<h3>${data.question}</h3>`)
+      $('#user-answer').hide();
+      $('#show-tenframe').hide();
+      $('#quiz-question').append(`<p>You answered ${data.correct} questions correctly!</p>`);
+      $('#quiz-question').append(`<p>You answered ${data.wrong} questions incorrectly.</p>`);
+    } else {
+      $("#quiz-question").append(`<h3>${data.question} = ?</h3>`);
+      $('#show-tenframe').show();
+    };
+  });
+  $('#user-answer-text').focus();
+};
+
+//Detect user touch
+window.addEventListener('touchstart', function onFirstTouch() {
+  userSessionStorage.setItem('touch_enable', 'true');
+  console.log(userSessionStorage.getItem('touch_enable'));
+  window.removeEventListener('touchstart', onFirstTouch, false);
+}, false);
+
+//Get and display quiz question
 $.ajax({url:"/question", dataType:"json"}).then( data => {
   emptyTenframe();
-  $('#quiz-question').append(`<h3>${data.question}</h3>`);
-  $('#get-next-btn').hide();
   if (data.question === "You haven't started a quiz!" || data.question === "End of Quiz!") {
+    $('#quiz-question').append(`<h3>${data.question}</h3>`);
     $('#user-answer').hide();
     $('#show-tenframe').hide();
   }
+  else {
+    $('#quiz-question').append(`<h3>${data.question} = ?</h3>`);
+    $('#get-next-btn').hide();
+  }
 });
 
+//Check user's password
+//Submit user registration info if password is typed correctly in password and confirm password fields
 $('#register-form').submit( evt => {
   const username = $('#createUsername').val();
   const password = $('#createPassword').val();
@@ -57,35 +102,21 @@ $('#register-form').submit( evt => {
   }
 });
 
-const nextQuestion = () => {
-  $('#game-container').addClass('bg-primary');
-  $('#quiz-question').empty();
-  $('#quiz-answer').empty();
-  $('#user-answer').show();
-  emptyTenframe();
-  $.ajax({url:"/question", dataType:"json"}).then( data => {
-    $("#quiz-question").append(`<h3>${data.question}</h3>`);
-    $('#get-next-btn').hide();
-    if (data.question === "You haven't started a quiz!") {
-      $('#user-answer').hide();
-      $('#show-tenframe').hide();
-    } else if (data.question === "End of Quiz!") {
-      $('#user-answer').hide();
-      $('#show-tenframe').hide();
-      $('#quiz-question').append(`<p>You answered ${data.correct} questions correctly!</p>`);
-      $('#quiz-question').append(`<p>You answered ${data.wrong} questions incorrectly.</p>`);
-    } else {
-      $('#show-tenframe').show();
-    };
-  });
-  $('#user-answer-text').focus();
-};
+//Give user session the current username on signin
+$('#signin-form').submit( evt => {
+  const username = $('#inputUsername').val();
+  userSessionStorage.setItem('username', username);
+  console.log(userSessionStorage.getItem('username'));
+});
 
+
+//Submit user's answer to quiz question
+//Display "correct" or "wrong" feedback for question answer
 $('#user-answer').submit( evt => {
   evt.preventDefault();
   $('#show-tenframe').hide();
   const url = $(evt.target).attr('action');
-  const question = $('h3').text();
+  const question = $('h3').text().slice(0, -4);
   const userAnswer = $('#user-answer-text').val();
   $.ajax(url, {
     dataType: "json",
@@ -97,43 +128,43 @@ $('#user-answer').submit( evt => {
       $("#quiz-answer").append(data.answer);
       $('#user-answer-text').val("");
     } else if (data.answer === "CORRECT!") {
-      $('#game-container').removeClass("bg-primary");
+      //$('#game-container').removeClass("bg-primary");
       $('#game-container').css("background-color", "mediumseagreen");
+      $('#quiz-question').hide();
       $('#quiz-answer').empty();
-      $("#quiz-answer").append(data.answer);
+      $("#quiz-answer").append(`<h3>${data.answer} ${question} = ${userAnswer}.</h3>`);
       $('#user-answer').hide();
       $('#user-answer-text').val("");
       $('#tenframes').prop('hidden', true);
       setTimeout(nextQuestion, 2000);
     } else if (data.answer === "Sorry! That's not the right answer.") {
-      $('#game-container').removeClass("bg-primary");
+      //$('#game-container').removeClass("bg-primary");
       $('#game-container').css("background-color", "indianred");
+      $('#quiz-question').hide();
       $('#quiz-answer').empty();
-      $("#quiz-answer").append(data.answer);
+      $("#quiz-answer").append(`<h3>${data.answer} ${question} does not equal ${userAnswer}.</h3>`);
       $('#user-answer').hide();
       $('#user-answer-text').val("");
       $('#tenframes').prop('hidden', true);
       setTimeout(nextQuestion, 2000);
     }
-
   });
 });
 
+//Show and hide the ten frame for the current quiz question when button clicked
 $('#show-tenframe').click( evt => {
   const tenframeBtn = $(evt.target);
   const btnText = tenframeBtn.text();
-  if (btnText === 'Show Tenframe') {
+  if (btnText === 'Show Ten Frame') {
     $('#tenframes').prop('hidden', false);
-    $('#show-tenframe').html('Hide Tenframe');
+    $('#show-tenframe').html('Hide Ten Frame');
     fillTenframe();
-  } else if (btnText === 'Hide Tenframe') {
+  } else if (btnText === 'Hide Ten Frame') {
     $('#tenframes').prop('hidden', true);
-    $('#show-tenframe').html('Show Tenframe');
+    $('#show-tenframe').html('Show Ten Frame');
   }
 });
 
-// Turn div with answer green or red when answer is right or wrong
-// Div goes back to blue when it goes to next question
 
 //$('#get-next-btn').on('click', function() {
 //  $('#quiz-question').empty();

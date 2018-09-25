@@ -16,16 +16,20 @@ class User(UserMixin, BaseModel):
     password = CharField(max_length=25)
     current_quiz = TextField(default="[]")
     is_admin = BooleanField(default=False)
+    is_student = BooleanField(default=True)
+    is_teacher = BooleanField(default=False)
 
     @classmethod
-    def create_user(cls, username, password, current_quiz="[]", admin=False):
+    def create_user(cls, username, password, current_quiz="[]", admin=False, student=True, teacher=False):
         try:
             with DATABASE.transaction():
                 cls.create(
                     username=username,
                     password=generate_password_hash(password),
                     current_quiz=current_quiz,
-                    is_admin=admin
+                    is_admin=admin,
+                    is_student=student,
+                    is_teacher=teacher,
                 )
         except IntegrityError:
             raise ValueError("Username already exists. Try again.")

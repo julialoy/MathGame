@@ -5,25 +5,26 @@
     <nav class="navbar fixed-top navbar-light bg-info">
       <a class="navbar-brand">Math Game!</a>
         <ul class="navbar-nav mr-auto mt-2 mt-lg-0 d-inline-flex flex-row">
-            <li class="nav-item"><a class="nav-item nav-link" href="{{ url_for('startquiz') }}">Start Quiz</a></li>
-            <li class="nav-item"><a class="nav-item nav-link active" href="{{ url_for('logout') }}">Sign Out</a></li>
+            <li class="nav-item"><a class="nav-item nav-link active" href="{{ url_for('startquickquiz') }}">Start Quick Quiz</a></li>
+            <li class="nav-item"><a class="nav-item nav-link" href="{{ url_for('startcustomquiz') }}">Start Custom Quiz</a></li>
+            <li class="nav-item"><a class="nav-item nav-link" href="{{ url_for('logout') }}">Sign Out</a></li>
         </ul>
     </nav>
 </div>
 
 
-    <div class="container d-flex-col justify-content-center bg-primary rounded py-4" id="game-container">
-        <p class="text-white" id="quiz-question">
+    <div class="container d-flex-col justify-content-center py-4" id="game-container">
+        <p id="quiz-question">
 
         </p>
-        <p class="text-white" id="quiz-answer">
+        <p id="quiz-answer">
 
         </p>
         <form class="input-group" id="user-answer" action="{{ url_for('checkanswer') }}">
             <input type="text" name="user-answer-text" id ="user-answer-text" class="form-control" autofocus>
             <button type="submit" name="answer-btn" id="submit-answer-button" class="btn btn-info input-group-append">Check Answer!</button>
         </form>
-        <button type="button" name="show-tenframe" id="show-tenframe" class="btn btn-dark">Show Tenframe</button>
+        <button type="button" name="show-tenframe" id="show-tenframe" class="btn btn-dark">Show Ten Frame</button>
     </div>
     <div class="container" id="tenframes" hidden>
 

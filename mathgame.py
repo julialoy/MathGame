@@ -1,8 +1,15 @@
-# Add: User classes---e.g., student, teacher, administrator
+# Add: User classes---e.g., student, teacher, administrator --> ADDED
+# Add ability to create custom quiz --> ADDED
+# Add ability to create a quiz with more than one kind of fact (addition AND subtraction, etc.)
+# Add ability to save your custom quiz
+# Add profile page with stats
+# Add list of your saved custom quizzes
+# Teachers should be able to: see list of all their students by class, create a new class (w/class code), create and save quizzes,
+# assign specific quizzes to students/classes with due dates, create assignments (e.g., take 4 addition quizzes by Tues.), see student
+# progress, send messages to students (?)
+# Students should be able to send messages to teacher for help on a specific quiz (?)
 # Distinct functionality for different classes
 # Graphs to visually show progress over time
-# Help button to show ten frames?
-# Ten frames
 # Achievements with badges?
 
 import operator, random
@@ -22,7 +29,9 @@ login_manager.login_view = "login"
 
 
 class Test:
-
+    """Creates the math test from the test type (description), a dictionary of the math questions and answers (created
+        by the CreateMathFacts class), and the number of questions.
+    """
     def __init__(self, test_type, test_questions_answers, test_length=-1):
         self.test_type = test_type
         self.test_questions_answers = test_questions_answers
@@ -50,12 +59,16 @@ class Test:
 
 
 class CreateMathFacts:
-
-    def __init__(self, math_op="+", neg_answers=False, start_num=0, end_num=10):
+    """Creates the set of questions and answers to feed into the Test class. Takes an operator (+, -, *), whether or
+        not to allow negative answers (true/false), a starting number, and an ending number to use when creating
+        the facts. For example, if you want to test addition math facts from 0 to 10, the start number is 0, the
+        end number is 10.
+    """
+    def __init__(self, math_op="+", start_num=0, end_num=10, neg_answers=False):
         self.math_op = math_op
-        self.neg_answers = neg_answers
         self.start_num = start_num
         self.end_num = end_num
+        self.neg_answers = neg_answers
 
     math_operators = {"+": operator.add,
                       "-": operator.sub,
@@ -95,6 +108,7 @@ class CreateMathFacts:
         return facts
 
 
+# Old function to run the test on the command line.
 def run_test(test):
     num_correct = 0
     num_wrong = 0
@@ -117,10 +131,11 @@ TESTMATHFACTS = CreateMathFacts().create_facts()
 EXAMPLETEST = Test("Kindergarten Math Facts", TESTMATHFACTS, 10)
 
 
+
 @login_manager.user_loader
 def load_user(id):
     try:
-        return models.User.get(models.User.id==id)
+        return models.User.get(models.User.id == id)
     except models.DoesNotExist:
         return None
 
@@ -140,7 +155,6 @@ def after_request(response):
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    # Add button to create new addition test if logged in.
     if not current_user.is_authenticated:
         return render_template('login.html')
     else:
@@ -158,7 +172,6 @@ def login():
         try:
             user = models.User.get(models.User.username == username)
         except models.DoesNotExist:
-            #return jsonify(msg="That username or password is incorrect.")
             flash("That username or password is incorrect. OMG BATS")
             return render_template('login.html')
         else:
@@ -167,11 +180,11 @@ def login():
                 login_user(user)
                 return redirect(url_for('index'))
             else:
-                #return jsonify(msg="That username or password is incorrect.")
                 flash("That username or password is incorrect. OMG CATS")
                 return render_template('login.html')
     else:
         return render_template('login.html')
+
 
 @app.route("/logout")
 @login_required
@@ -204,16 +217,14 @@ def register():
             )
             return redirect(url_for('login'))
         except ValueError:
-            #return jsonify(msg="That username already exists.")
             return render_template('register.html')
     else:
         return render_template('register.html')
 
 
-@app.route("/startquiz", methods=["GET", "POST"])
+@app.route("/startquickquiz", methods=["GET", "POST"])
 @login_required
-def startquiz():
-#  return render_template('startquiz.html')
+def startquickquiz():
     new_test = Test("Kindergarten Addition Math Facts", CreateMathFacts().create_facts(), 10)
     session['current_facts'] = new_test.test_questions_answers
     session['current_quiz'] = new_test.test_questions
@@ -222,6 +233,38 @@ def startquiz():
          .where(models.Score.user_id == current_user.id))
     q.execute()
     return redirect(url_for('index'))
+
+
+@app.route("/startcustomquiz", methods=["GET", "POST"])
+@login_required
+def startcustomquiz():
+    if request.form:
+        quiz_setup = request.form
+        quiz_desc = quiz_setup['test-name']
+        quiz_op = quiz_setup['fact-type']
+        quiz_length = int(quiz_setup['number-questions'])
+
+        if quiz_setup['start-num'] != '':
+            quiz_start = int(quiz_setup['start-num'])
+        else:
+            quiz_start = 0
+
+        if quiz_setup['end-num'] != '':
+            quiz_end = int(quiz_setup['end-num'])
+        else:
+            quiz_end = 10
+
+        cust_facts = CreateMathFacts(quiz_op, quiz_start, quiz_end)
+        cust_quiz = Test(quiz_desc, cust_facts.create_facts(), quiz_length)
+        session['current_facts'] = cust_quiz.test_questions_answers
+        session['current_quiz'] = cust_quiz.test_questions
+        q = (models.Score
+             .update({models.Score.total_quiz_num: models.Score.total_quiz_num + 1})
+             .where(models.Score.user_id == current_user.id))
+        q.execute()
+        return redirect(url_for('index'))
+    else:
+        return render_template('startquiz.html')
 
 
 @app.route("/question", methods=["GET"])

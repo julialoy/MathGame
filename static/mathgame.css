@@ -88,14 +88,31 @@ body {
   padding-bottom: .25rem;
 }
 
+#game-container {
+  background-color: lightgrey;
+  border-radius: 25px;
+}
+
+.quiz-setup {
+  padding: 2rem;
+  background-color: lightgrey;
+  border-radius: 25px;
+}
+
 #tenframes {
   padding-top: 1rem;
   padding-left: 10rem;
   padding-right: 10rem;
 }
 
-#tenframe-table {
-  border: 3px solid purple;
+#tenframe-table-one,
+#tenframe-table-two {
+  border: 4px solid #17a2b8;
+}
+
+.table-bordered tr,
+.table-bordered td {
+  border-color: white !important;
 }
 
 tr {
