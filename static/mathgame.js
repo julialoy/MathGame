@@ -1,7 +1,6 @@
 //Store some info about the session
 const userSessionStorage = window.sessionStorage;
 
-
 //Fill two ten frames per the current quiz question
 const fillTenframe = () => {
   const testNumOne = $.trim($('#quiz-question').text());
@@ -21,7 +20,6 @@ const fillTenframe = () => {
     redSphereTwo.setAttribute("style", "background-color:#17a2b8");
   }
 };
-
 
 //Change to two empty ten frames
 const emptyTenframe = () => {
@@ -44,6 +42,7 @@ const nextQuestion = () => {
   $('#quiz-answer').empty();
   $('#quiz-question').show();
   $('#user-answer').show();
+  $('#submit-answer-button').show();
   emptyTenframe();
   $('#show-tenframe').html('Show Ten Frame');
   $.ajax({url:"/question", dataType:"json"}).then( data => {
@@ -51,13 +50,17 @@ const nextQuestion = () => {
     if (data.question === "You haven't started a quiz!") {
       $('#quiz-question').append(`<h3>${data.question}</h3>`)
       $('#user-answer').hide();
+      $('#submit-answer-button').hide();
       $('#show-tenframe').hide();
     } else if (data.question === "End of Quiz!") {
       $('#quiz-question').append(`<h3>${data.question}</h3>`)
       $('#user-answer').hide();
+      $('#submit-answer-button').hide();
       $('#show-tenframe').hide();
-      $('#quiz-question').append(`<p>You answered ${data.correct} questions correctly!</p>`);
-      $('#quiz-question').append(`<p>You answered ${data.wrong} questions incorrectly.</p>`);
+      $('#quiz-question').append(`<p>You answered ${data.current_correct} questions correctly!</p>`);
+      $('#quiz-question').append(`<p>You answered ${data.current_incorrect} questions incorrectly.</p>`);
+      $('#quiz-question').append(`<p>You have answered ${data.overall_correct} questions correctly overall!</p>`);
+      $('#quiz-question').append(`<p>You have answered ${data.overall_incorrect} questions incorrectly overall!</p>`);
     } else {
       $("#quiz-question").append(`<h3>${data.question} = ?</h3>`);
       $('#show-tenframe').show();
@@ -79,6 +82,7 @@ $.ajax({url:"/question", dataType:"json"}).then( data => {
   if (data.question === "You haven't started a quiz!" || data.question === "End of Quiz!") {
     $('#quiz-question').append(`<h3>${data.question}</h3>`);
     $('#user-answer').hide();
+    $('#submit-answer-button').hide();
     $('#show-tenframe').hide();
   }
   else {
@@ -109,7 +113,6 @@ $('#signin-form').submit( evt => {
   console.log(userSessionStorage.getItem('username'));
 });
 
-
 //Submit user's answer to quiz question
 //Display "correct" or "wrong" feedback for question answer
 $('#user-answer').submit( evt => {
@@ -134,6 +137,7 @@ $('#user-answer').submit( evt => {
       $('#quiz-answer').empty();
       $("#quiz-answer").append(`<h3>${data.answer} ${question} = ${userAnswer}.</h3>`);
       $('#user-answer').hide();
+      $('#submit-answer-button').hide();
       $('#user-answer-text').val("");
       $('#tenframes').prop('hidden', true);
       setTimeout(nextQuestion, 2000);
@@ -144,6 +148,7 @@ $('#user-answer').submit( evt => {
       $('#quiz-answer').empty();
       $("#quiz-answer").append(`<h3>${data.answer} ${question} does not equal ${userAnswer}.</h3>`);
       $('#user-answer').hide();
+      $('#submit-answer-button').hide();
       $('#user-answer-text').val("");
       $('#tenframes').prop('hidden', true);
       setTimeout(nextQuestion, 2000);

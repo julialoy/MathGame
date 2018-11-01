@@ -1,25 +1,26 @@
 {% extends 'layout.html' %}
 
 {% block content %}
+<div id="signin-block">
+    <form class="form-signin" id="signin-form" action="{{ url_for('login') }}" method="POST">
+        <div class="text-center mb-4">
+            <h1 class="h3 mb-3 font-weight-normal text-info">Math Quiz!</h1>
+        </div>
 
-<form class="form-signin" id="signin-form" action="{{ url_for('login') }}" method="POST">
-    <div class="text-center mb-4">
-        <h1 class="h3 mb-3 font-weight-normal text-info">Math Quiz!</h1>
-    </div>
+        <div class="form-label-group">
+            <input type="text" id="inputUsername" class="form-control" placeholder="Username" name="username" required autofocus>
+            <label for="inputUsername">Username</label>
+        </div>
 
-    <div class="form-label-group">
-        <input type="text" id="inputUsername" class="form-control" placeholder="Username" name="username" required autofocus>
-        <label for="inputUsername">Username</label>
-    </div>
+        <div class="form-label-group">
+            <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required>
+            <label for="inputPassword">Password</label>
+        </div>
+        <button class="btn btn-lg btn-info btn-block" type="submit" name="signin-btn" id="signin-btn">Sign in</button>
 
-    <div class="form-label-group">
-        <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required>
-        <label for="inputPassword">Password</label>
-    </div>
-    <button class="btn btn-lg btn-info btn-block" type="submit" name="signin-btn" id="signin-btn">Sign in</button>
-
-</form>
-    <p class="mt-5 mb-3 text-center">
-        <a class="text-info" href="{{ url_for('register') }}">Register</a>
-    </p>
+    </form>
+        <p class="mt-5 mb-3 text-center">
+            <a class="text-info" href="{{ url_for('register') }}">Register</a>
+        </p>
+</div>
 {% endblock %}
