@@ -117,6 +117,15 @@ body {
   margin-top: 1.5rem;
 }
 
+/* PROFILE */
+
+#profile-container {
+  border: 0.25rem solid #17a2b8;
+  border-radius: 25px;
+  margin-top: 5em;
+}
+
+
 /* QUIZ QUESTION CONTAINER */
 
 #game-container {
@@ -193,6 +202,11 @@ body {
       /*margin-top: 7rem;*/
       height: 65%;
     }
+
+   #sidebar, ul {
+     list-style-type: none;
+   }
+
 
 }
 

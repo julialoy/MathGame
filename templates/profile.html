@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="row main-row fill" id="main-profile">
+    <div class="container d-flex-col col-8 align-self-start justify-content-center py-4" id="profile-container">
+        <div class="h5 text-center" id="profile-heading">
+            {{ current_user.username }}'s Profile
+        </div>
+        <div class="justify-content-center" id="quiz-list">
+            Saved Quizzes:
+            <ul>
+            {% for quiz in quiz_list %}
+                <li><a href="{{ url_for('startsavedquiz', saved_quiz_id=quiz.id) }}">
+                    {{ quiz.quiz_name }}
+                </a></li>
+            {% endfor %}
+            </ul>
+        </div>
+        <div id="overall-scores">
+            Overall Score:
+            {% for score in overall_scores %}
+            <ul>
+                <li>Total questions answered correctly: {{ score.total_questions_correct }}</li>
+                <li>Total questions answered incorrectly: {{ score.total_questions_wrong }}</li>
+            </ul>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

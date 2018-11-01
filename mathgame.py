@@ -234,6 +234,19 @@ def register():
         return render_template('register.html')
 
 
+@app.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    quiz_list = (models.SavedQuizzes.select()
+                 .join(models.User, on=(models.SavedQuizzes.user_id == models.User.id))
+                 .where(models.User.id == current_user.id))
+
+    overall_scores = (models.Score.select()
+                      .join(models.User, on=(models.Score.user_id == models.User.id))
+                      .where(models.User.id == current_user.id))
+    return render_template('profile.html', quiz_list=quiz_list, overall_scores=overall_scores)
+
+
 @app.route("/startquickquiz", methods=["GET", "POST"])
 @login_required
 def startquickquiz():
