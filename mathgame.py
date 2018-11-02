@@ -19,6 +19,9 @@
 # Distinct functionality for different classes
 # Graphs to visually show progress over time
 # Achievements with badges?
+# Fix navbar so active page is styled as active
+# Add tooltips to custom quiz page
+# Cosnider removing placeholder text from start/end numbers on custom quiz page
 
 from flask import Flask, flash, g, jsonify, redirect, render_template, request, session, sessions, url_for
 from flask_bcrypt import check_password_hash

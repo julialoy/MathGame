@@ -84,8 +84,7 @@ $.ajax({url:"/question", dataType:"json"}).then( data => {
     $('#user-answer').hide();
     $('#submit-answer-button').hide();
     $('#show-tenframe').hide();
-  }
-  else {
+  } else {
     $('#quiz-question').append(`<h3>${data.question} = ?</h3>`);
     $('#get-next-btn').hide();
   }
@@ -111,6 +110,21 @@ $('#signin-form').submit( evt => {
   const username = $('#inputUsername').val();
   userSessionStorage.setItem('username', username);
   console.log(userSessionStorage.getItem('username'));
+});
+
+//Check ending number
+$('#quiz-setup-form').submit( evt => {
+  const startNum = parseInt($('#startNum').val());
+  const endNum = parseInt($('#endNum').val());
+  if (startNum > endNum) {
+    alert("The starting number must be greater than the ending number. Please provide a new starting number.");
+    $('#startNum').val("");
+    evt.preventDefault();
+  } else if (endNum > 2000) {
+    alert("The ending number must be 2000 or less. Please provide a new ending number.");
+    $('#endNum').val("");
+    evt.preventDefault();
+  }
 });
 
 //Submit user's answer to quiz question
@@ -169,22 +183,3 @@ $('#show-tenframe').click( evt => {
     $('#show-tenframe').html('Show Ten Frame');
   }
 });
-
-
-//$('#get-next-btn').on('click', function() {
-//  $('#quiz-question').empty();
-//  $('#quiz-answer').empty();
-//  $('#user-answer').show();
-//  $.ajax({url:"/question", dataType:"json"}).then((data) => {
-//    $("#quiz-question").append(`<h3>${data.question}</h3>`);
-//    $('#get-next-btn').hide();
-//    if (data.question === "You haven't started a quiz!") {
-//      $('#user-answer').hide();
-//    } else if (data.question === "End of Quiz!") {
-//      $('#user-answer').hide();
-//      $('#quiz-question').append(`<p>You answered ${data.correct} questions correctly!</p>`);
-//      $('#quiz-question').append(`<p>You answered ${data.wrong} questions incorrectly.</p>`);
-//    };
-//  });
-//  $('#user-answer-text').focus();
-//});
