@@ -1,38 +1,75 @@
 //Store some info about the session
 const userSessionStorage = window.sessionStorage;
 
-//Fill two ten frames per the current quiz question
-const fillTenframe = () => {
-  const testNumOne = $.trim($('#quiz-question').text());
-  const numOne = testNumOne.split(" + ");
-  const tableOne = document.getElementById('tenframe-table-one');
-  const tableTwo = document.getElementById('tenframe-table-two');
-  const tableOneCells = tableOne.getElementsByTagName("td");
-  const tableTwoCells = tableTwo.getElementsByTagName("td");
-
-  for (i = 0; i < parseInt(numOne[0]); i++) {
-    const redSphereOne = tableOneCells[i].firstChild;
-    redSphereOne.setAttribute("style", "background-color:#17a2b8");
+//Split string on mathematical operator
+const splitOnOperator = (myString) => {
+  if (myString.includes('+')) {
+    const splitNum = myString.split(" + ");
+    return splitNum;
+  } else if (myString.includes('-')) {
+    const splitNum = myString.split(" - ");
+    return splitNum;
+  } else if (myString.includes('*')) {
+    const splitNum = myString.split(" * ");
+    return splitNum;
   }
+};
 
-  for (i = 0; i <parseInt(numOne[1]); i++) {
-    const redSphereTwo = tableTwoCells[i].firstChild;
-    redSphereTwo.setAttribute("style", "background-color:#17a2b8");
+//Get question numbers
+//let questionNumbers = splitOnOperator($.trim($('#quiz-question').text()).split(" = ")[0]);
+
+//Check whether to use ten frames
+const useTenframes = (numbers) => {
+  if (numbers[0] < 11 && numbers[1] < 11) {
+    const tenFrame = true;
+    return tenFrame;
+  } else {
+    const tenFrame = false;
+    return tenFrame;
+  }
+};
+
+//Fill two ten frames per the current quiz question
+const fillTenframe = (numbers) => {
+  //const testNumOne = $.trim($('#quiz-question').text()).split(" = ")[0];
+  //const numOne = splitOnOperator(questionNumbers);
+  //if (questionNumbers[0] < 11 && questionNumbers[1] < 11) {
+  if (useTenframes(numbers) === true) {
+      const tableOne = document.getElementById('tenframe-table-one');
+      const tableTwo = document.getElementById('tenframe-table-two');
+      const tableOneCells = tableOne.getElementsByTagName("td");
+      const tableTwoCells = tableTwo.getElementsByTagName("td");
+
+      for (i = 0; i < parseInt(numbers[0]); i++) {
+        const redSphereOne = tableOneCells[i].firstChild;
+        redSphereOne.setAttribute("style", "background-color:#17a2b8");
+      }
+
+      for (i = 0; i <parseInt(numbers[1]); i++) {
+        const redSphereTwo = tableTwoCells[i].firstChild;
+        redSphereTwo.setAttribute("style", "background-color:#17a2b8");
+      }
+  } else {
+    $('#show-tenframe').hide();
   }
 };
 
 //Change to two empty ten frames
 const emptyTenframe = () => {
-  const tableOne = document.getElementById('tenframe-table-one');
-  const tableTwo = document.getElementById('tenframe-table-two');
-  const tableOneCells = tableOne.getElementsByTagName("td");
-  const tableTwoCells = tableTwo.getElementsByTagName("td");
-  for (i = 0; i < 10; i++) {
-    const redSphereOne = tableOneCells[i].firstChild;
-    const redSphereTwo = tableTwoCells[i].firstChild;
-    redSphereOne.setAttribute("style", "background-color:#212529");
-    redSphereTwo.setAttribute("style", "background-color:#212529");
-  }
+  //if (useTenframes() === true) {
+      const tableOne = document.getElementById('tenframe-table-one');
+      const tableTwo = document.getElementById('tenframe-table-two');
+      const tableOneCells = tableOne.getElementsByTagName("td");
+      const tableTwoCells = tableTwo.getElementsByTagName("td");
+      for (i = 0; i < 10; i++) {
+        const redSphereOne = tableOneCells[i].firstChild;
+        const redSphereTwo = tableTwoCells[i].firstChild;
+        redSphereOne.setAttribute("style", "background-color:#212529");
+        redSphereTwo.setAttribute("style", "background-color:#212529");
+      }
+  //} else {
+  //  $('#show-tenframe').hide();
+  //}
 };
 
 //Get the next quiz question
@@ -63,7 +100,12 @@ const nextQuestion = () => {
       $('#quiz-question').append(`<p>You have answered ${data.overall_incorrect} questions incorrectly overall!</p>`);
     } else {
       $("#quiz-question").append(`<h3>${data.question} = ?</h3>`);
-      $('#show-tenframe').show();
+      const quizNumbers = splitOnOperator($.trim($('#quiz-question').text()).split(" = ")[0]);
+      if (useTenframes(quizNumbers) === true) {
+        $('#show-tenframe').show();
+      } else {
+        $('#show-tenframe').hide();
+      }
     };
   });
   $('#user-answer-text').focus();
@@ -87,6 +129,10 @@ $.ajax({url:"/question", dataType:"json"}).then( data => {
   } else {
     $('#quiz-question').append(`<h3>${data.question} = ?</h3>`);
     $('#get-next-btn').hide();
+    const quizNumbers = splitOnOperator($.trim($('#quiz-question').text()).split(" = ")[0]);
+    if (useTenframes(quizNumbers) === false) {
+      $('#show-tenframe').hide();
+    }
   }
 });
 
@@ -172,12 +218,13 @@ $('#user-answer').submit( evt => {
 
 //Show and hide the ten frame for the current quiz question when button clicked
 $('#show-tenframe').click( evt => {
+  const quizNumbers = splitOnOperator($.trim($('#quiz-question').text()).split(" = ")[0]);
   const tenframeBtn = $(evt.target);
   const btnText = tenframeBtn.text();
   if (btnText === 'Show Ten Frame') {
     $('#tenframes').prop('hidden', false);
     $('#show-tenframe').html('Hide Ten Frame');
-    fillTenframe();
+    fillTenframe(quizNumbers);
   } else if (btnText === 'Hide Ten Frame') {
     $('#tenframes').prop('hidden', true);
     $('#show-tenframe').html('Show Ten Frame');
