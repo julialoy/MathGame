@@ -1,3 +1,4 @@
+import datetime
 import operator
 import random
 
@@ -48,6 +49,11 @@ class User(UserMixin, BaseModel):
 
     def is_anonymous(self):
         return False
+
+
+class UserInfo(BaseModel):
+    user = ForeignKeyField(User)
+    pic = CharField()
 
 
 class Score(BaseModel):
@@ -113,7 +119,18 @@ class SavedQuizzes(BaseModel):
         return test_questions
 
 
+# Keep track of user scores on saved quizzes
+# Be able to show score for a specific day
+# Be able to show overall trend
+class UserScores(BaseModel):
+    user_id = ForeignKeyField(User, unique=False)
+    quiz_id = ForeignKeyField(SavedQuizzes, unique=False)
+    questions_correct = IntegerField(default=0)
+    questions_wrong = IntegerField(default=0)
+    date_taken = DateTimeField(default=datetime.datetime.now)
+
+
 def initialize():
     DATABASE.connect()
-    DATABASE.create_tables([User, Score, SavedQuizzes], safe=True)
+    DATABASE.create_tables([User, UserInfo, Score, SavedQuizzes, UserScores], safe=True)
     DATABASE.close()

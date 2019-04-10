@@ -125,12 +125,28 @@ body {
   margin-top: 5em;
 }
 
+#profile-pic {
+  display: inline-block;
+  position: relative;
+  z-index: 3;
+  max-width: 15%;
+  height: auto;
+}
+
+#quiz-list {
+  margin-left: 2rem;
+}
+
+#overall-scores {
+  margin-left: 2rem;
+}
+
 /* QUIZ QUESTION CONTAINER */
 
 #game-container {
   background-color: lightgrey;
   border-radius: 25px;
-  margin-top: 15rem;
+  margin-top: 10rem;
 }
 
 /* CUSTOM QUIZ FORM */

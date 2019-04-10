@@ -96,8 +96,8 @@ const nextQuestion = () => {
       $('#show-tenframe').hide();
       $('#quiz-question').append(`<p>You answered ${data.current_correct} questions correctly!</p>`);
       $('#quiz-question').append(`<p>You answered ${data.current_incorrect} questions incorrectly.</p>`);
-      $('#quiz-question').append(`<p>You have answered ${data.overall_correct} questions correctly overall!</p>`);
-      $('#quiz-question').append(`<p>You have answered ${data.overall_incorrect} questions incorrectly overall!</p>`);
+/*      $('#quiz-question').append(`<p>You have answered ${data.overall_correct} questions correctly overall!</p>`);
+      $('#quiz-question').append(`<p>You have answered ${data.overall_incorrect} questions incorrectly overall!</p>`);*/
     } else {
       $("#quiz-question").append(`<h3>${data.question} = ?</h3>`);
       const quizNumbers = splitOnOperator($.trim($('#quiz-question').text()).split(" = ")[0]);

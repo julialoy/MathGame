@@ -2,13 +2,13 @@
 # Add ability to create custom quiz --> ADDED
 # End of quiz screen should show how many questions you got right/wrong for that quiz. Could also show a bar graph. ADDED w/out graph
 # Move overall right/wrong to a profile/statistics page
-# Overall scores should be available on profile page.
+# Overall scores should be available on profile page. --> ADDED
 # Scores for quick quizzes not kept in database. Scores for teacher-assigned quizzes or custome named quizzes should
 # be kept in database and separated by quiz type. Need to add new table for keeping quizzes.
 # Add ability to create a quiz with more than one kind of fact (addition AND subtraction, etc.)
 # Add sidebar for some of this stuff --> ADDED
 # Add ability to save your custom quiz --> ADDED
-# Add profile page with stats
+# Add profile page with stats --> ADDED, bare bones
 # Add list of your saved custom quizzes --> ADDED
 # Change list of custom quizzes in sidebar to show only most recent 5 (or 10).
 # If more than that number sidebar should show a button for "more" that takes you to your profile page
@@ -18,24 +18,36 @@
 # Students should be able to send messages to teacher for help on a specific quiz (?)
 # Distinct functionality for different classes
 # Graphs to visually show progress over time
-# Achievements with badges?
 # Fix navbar so active page is styled as active
 # Add tooltips to custom quiz page
 # Cosnider removing placeholder text from start/end numbers on custom quiz page
 
-from flask import Flask, flash, g, jsonify, redirect, render_template, request, session, sessions, url_for
+import os
+
+from flask import (Flask, flash, g, jsonify, redirect, render_template, request,
+                   send_from_directory, session, sessions, url_for)
 from flask_bcrypt import check_password_hash
-from flask_login import (current_user, LoginManager, login_required, login_user, logout_user, UserMixin)
+from flask_login import (current_user, LoginManager, login_required, login_user,
+                         logout_user, UserMixin)
+from werkzeug.utils import secure_filename
 
 import models
 
-app = Flask(__name__)
-app.secret_key = 'dshfjkrehtuia^&#C@@%&*(fdsh21243254235'
 DEBUG = True
+UPLOAD_FOLDER = 'static/images/pics_user'
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
+
+app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.secret_key = 'dshfjkrehtuia^&#C@@%&*(fdsh21243254235'
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 #
 # class Test:
@@ -240,14 +252,73 @@ def register():
 @app.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
+    selected_user = models.User.get(models.User.id==current_user.id)
+    selected_user_info, created = models.UserInfo.get_or_create(
+        user_id=current_user.id,
+        defaults={'pic': ""}
+    )
     quiz_list = (models.SavedQuizzes.select()
-                 .join(models.User, on=(models.SavedQuizzes.user_id == models.User.id))
-                 .where(models.User.id == current_user.id))
+                 .join(models.User, on=(models.SavedQuizzes.user_id==models.User.id))
+                 .where(models.User.id==current_user.id))
 
     overall_scores = (models.Score.select()
-                      .join(models.User, on=(models.Score.user_id == models.User.id))
-                      .where(models.User.id == current_user.id))
-    return render_template('profile.html', quiz_list=quiz_list, overall_scores=overall_scores)
+                      .join(models.User, on=(models.Score.user_id==models.User.id))
+                      .where(models.User.id==current_user.id))
+    return render_template('profile.html',
+                           quiz_list=quiz_list,
+                           overall_scores=overall_scores,
+                           selected_user=selected_user,
+                           selected_user_info=selected_user_info)
+
+
+@app.route("/uploader", methods=["GET", "POST"])
+@login_required
+def uploader():
+    selected_user = g.user.id
+
+    if request.method == "POST":
+        if 'file' not in request.files:
+            flash("No file part")
+            return redirect(request.url)
+    file = request.files['file']
+
+    if file.filename == '':
+        flash("No file selected")
+        return redirect(request.url)
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        selected_user_info, created = models.UserInfo.get_or_create(
+            user_id=selected_user,
+            defaults={'pic': ""}
+        )
+        q = models.UserInfo.update(
+            pic=filename
+        ).where(models.UserInfo.user_id==selected_user_info.user_id)
+        q.execute()
+        return redirect(url_for('profile', user_id=selected_user))
+
+
+@app.route("/uploads/<filename>")
+@login_required
+def upload_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+
+@app.route("/removeimage/<filename>", methods=["GET", "POST"])
+@login_required
+def remove_file(filename):
+    selected_user = models.User.get(models.User.id==current_user.id)
+    selected_user_info = models.UserInfo.get(models.UserInfo.user_id==selected_user.id)
+    item_id = filename
+    #print("filename is {}".format(filename))
+    q = models.UserInfo.update(
+        pic=""
+    ).where(models.UserInfo.user_id==selected_user_info.user_id)
+    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], item_id))
+    q.execute()
+    return redirect(url_for('profile'))
 
 
 @app.route("/startquickquiz", methods=["GET", "POST"])
