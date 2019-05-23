@@ -3,7 +3,7 @@
 # End of quiz screen should show how many questions you got right/wrong for that quiz. Could also show a bar graph. ADDED w/out graph
 # Move overall right/wrong to a profile/statistics page
 # Overall scores should be available on profile page. --> ADDED
-# Scores for quick quizzes not kept in database. Scores for teacher-assigned quizzes or custome named quizzes should
+# Scores for quick quizzes not kept in database. Scores for teacher-assigned quizzes or custom named quizzes should
 # be kept in database and separated by quiz type. Need to add new table for keeping quizzes.
 # Add ability to create a quiz with more than one kind of fact (addition AND subtraction, etc.)
 # Add sidebar for some of this stuff --> ADDED
@@ -21,7 +21,11 @@
 # Fix navbar so active page is styled as active
 # Add tooltips to custom quiz page
 # Cosnider removing placeholder text from start/end numbers on custom quiz page
-
+# Add division
+# Change profile upload image to a question mark in a circle, which is also the link for uploading/changing pic
+# Change to Flask Blueprints
+# Add ability to show graphs for trends in user profile using numPy
+from datetime import datetime
 import os
 
 from flask import (Flask, flash, g, jsonify, redirect, render_template, request,
@@ -219,6 +223,7 @@ def logout():
     session.pop('current_quiz_desc', None)
     session.pop('current_num_correct', None)
     session.pop('current_num_incorrect', None)
+    session.pop('current_user_score', None)
     logout_user()
     return redirect(url_for('index'))
 
@@ -236,12 +241,12 @@ def register():
                 username=username,
                 password=password
             )
-            models.Score.create(
-                user_id=models.User.get(models.User.username == username),
-                total_quiz_num=0,
-                total_questions_correct=0,
-                total_questions_wrong=0,
-            )
+            # models.Score.create(
+            #     user_id=models.User.get(models.User.username == username),
+            #     total_quiz_num=0,
+            #     total_questions_correct=0,
+            #     total_questions_wrong=0,
+            # )
             return redirect(url_for('login'))
         except ValueError:
             return render_template('register.html')
@@ -261,12 +266,21 @@ def profile():
                  .join(models.User, on=(models.SavedQuizzes.user_id==models.User.id))
                  .where(models.User.id==current_user.id))
 
-    overall_scores = (models.Score.select()
-                      .join(models.User, on=(models.Score.user_id==models.User.id))
-                      .where(models.User.id==current_user.id))
+    num_quiz_total = (models.UserScores.select()
+                      .join(models.User, on=(models.UserScores.user_id == models.User.id))
+                      .where(models.User.id == current_user.id))
+    print(len(num_quiz_total))
+    quiz_types = (models.UserScores.select()
+                  .join(models.User, on=(models.UserScores.user_id == models.User.id))
+                  .where(models.User.id == current_user.id))
+    quiz_types_taken = [quiz_type.quiz_type for quiz_type in quiz_types]
+    print(quiz_types_taken)
+    # overall_scores = (models.UserScores.select()
+    #                   .join(models.User, on=(models.UserScores.user_id==models.User.id))
+    #                   .where(models.User.id==current_user.id))
     return render_template('profile.html',
                            quiz_list=quiz_list,
-                           overall_scores=overall_scores,
+                           # overall_scores=overall_scores,
                            selected_user=selected_user,
                            selected_user_info=selected_user_info)
 
@@ -337,15 +351,27 @@ def startquickquiz():
                                    )
     current_facts = new_test.create_facts()
     current_quiz = new_test.create_test(current_facts)
+    current_user_score = models.UserScores.create(
+        user_id=current_user.id,
+        quiz_id=0,
+        quiz_type="+",
+        questions_correct=0,
+        questions_wrong=0,
+        questions_total=10,
+        date_taken=datetime.now()
+    )
     session['current_facts'] = current_facts
     session['current_quiz'] = current_quiz
     session['current_quiz_desc'] = new_test.quiz_name
     session['current_num_correct'] = 0
     session['current_num_incorrect'] = 0
-    q = (models.Score
-         .update({models.Score.total_quiz_num: models.Score.total_quiz_num + 1})
-         .where(models.Score.user_id == current_user.id))
-    q.execute()
+    session['current_user_score'] = current_user_score.id
+    # Add a new row instead (above)
+
+    # q = (models.UserScores
+    #      .update({models.UserScores.total_quiz_num: models.UserScores.total_quiz_num + 1})
+    #      .where(models.Score.user_id == current_user.id))
+    # q.execute()
     return redirect(url_for('index'))
 
 
@@ -384,15 +410,27 @@ def startcustomquiz():
 
         cust_facts = new_cust_quiz.create_facts()
         cust_quiz = new_cust_quiz.create_test(cust_facts)
+        current_user_score = models.UserScores.create(
+            user_id=current_user.id,
+            quiz_id=new_cust_quiz.id,
+            quiz_type=quiz_op,
+            questions_correct=0,
+            questions_wrong=0,
+            questions_total=quiz_length,
+            date_taken=datetime.now()
+        )
         session['current_facts'] = cust_facts
         session['current_quiz'] = cust_quiz
         session['current_quiz_desc'] = new_cust_quiz.quiz_name
         session['current_num_correct'] = 0
         session['current_num_incorrect'] = 0
-        q = (models.Score
-             .update({models.Score.total_quiz_num: models.Score.total_quiz_num + 1})
-             .where(models.Score.user_id == current_user.id))
-        q.execute()
+        session['current_user_score'] = current_user_score.id
+        # Add a new row instead (above)
+
+        # q = (models.Score
+        #      .update({models.Score.total_quiz_num: models.Score.total_quiz_num + 1})
+        #      .where(models.Score.user_id == current_user.id))
+        # q.execute()
 
         return redirect(url_for('index'))
     else:
@@ -405,15 +443,26 @@ def startsavedquiz(saved_quiz_id):
     saved_quiz_base = (models.SavedQuizzes.get(models.SavedQuizzes.id == saved_quiz_id))
     saved_quiz_facts = saved_quiz_base.create_facts()
     saved_quiz = saved_quiz_base.create_test(saved_quiz_facts)
+    # Add a new row instead
+    current_user_score = models.UserScores.create(
+        user_id=current_user.id,
+        quiz_id=saved_quiz_id,
+        quiz_type=saved_quiz_base.math_op,
+        questions_correct=0,
+        questions_wrong=0,
+        questions_total=saved_quiz_base.quiz_length,
+        date_taken=datetime.now()
+    )
     session['current_facts'] = saved_quiz_facts
     session['current_quiz'] = saved_quiz
     session['current_quiz_desc'] = saved_quiz_base.quiz_name
     session['current_num_correct'] = 0
     session['current_num_incorrect'] = 0
-    q = (models.Score
-         .update({models.Score.total_quiz_num: models.Score.total_quiz_num + 1})
-         .where(models.Score.user_id == current_user.id))
-    q.execute()
+    session['current_user_score'] = current_user_score.id
+    # q = (models.Score
+    #      .update({models.Score.total_quiz_num: models.Score.total_quiz_num + 1})
+    #      .where(models.Score.user_id == current_user.id))
+    # q.execute()
     return redirect(url_for('index'))
 
 
@@ -430,16 +479,16 @@ def question():
             session['current_quiz'] = session['current_quiz']
             return jsonify(question=new_question)
         else:
-            q = (models.Score.select()
-                             .join(models.User, on=(models.Score.user_id == models.User.id))
-                             .where(models.User.id == current_user.id))
-            overall_correct = [num.total_questions_correct for num in q]
-            overall_incorrect = [num.total_questions_wrong for num in q]
+            # q = (models.Score.select()
+            #                  .join(models.User, on=(models.Score.user_id == models.User.id))
+            #                  .where(models.User.id == current_user.id))
+            # overall_correct = [num.questions_correct for num in session['current_user_score']]
+            # overall_incorrect = [num.questions_wrong for num in session['current_user_score']]
             current_correct = session['current_num_correct']
             current_incorrect = session['current_num_incorrect']
             return jsonify(question="End of Quiz!",
-                           overall_correct=overall_correct,
-                           overall_incorrect=overall_incorrect,
+                           # overall_correct=overall_correct,
+                           # overall_incorrect=overall_incorrect,
                            current_correct=current_correct,
                            current_incorrect=current_incorrect,
                            )
@@ -456,17 +505,23 @@ def checkanswer():
         return jsonify(answer="Try again! Please enter a number.")
     else:
         if user_answer == session['current_facts'][quiz_question]:
-            q = (models.Score
-                 .update({models.Score.total_questions_correct: models.Score.total_questions_correct + 1})
-                 .where(models.Score.user_id == current_user.id))
+            q = (models.UserScores.update({models.UserScores.questions_correct: models.UserScores.questions_correct + 1})
+                 .where(models.UserScores.id == session['current_user_score']))
             q.execute()
+            # q = (models.Score
+            #      .update({models.Score.total_questions_correct: models.Score.total_questions_correct + 1})
+            #      .where(models.Score.user_id == current_user.id))
+            # q.execute()
             session['current_num_correct'] += 1
             return jsonify(answer="CORRECT!")
         else:
-            q = (models.Score
-                 .update({models.Score.total_questions_wrong: models.Score.total_questions_wrong + 1})
-                 .where(models.Score.user_id == current_user.id))
+            q = (models.UserScores.update({models.UserScores.questions_wrong: models.UserScores.questions_wrong + 1})
+                 .where(models.UserScores.id == session['current_user_score']))
             q.execute()
+            # q = (models.Score
+            #      .update({models.Score.total_questions_wrong: models.Score.total_questions_wrong + 1})
+            #      .where(models.Score.user_id == current_user.id))
+            # q.execute()
             session['current_num_incorrect'] += 1
             return jsonify(answer="Sorry! That's not the right answer.")
 

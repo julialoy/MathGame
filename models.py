@@ -55,7 +55,7 @@ class UserInfo(BaseModel):
     user = ForeignKeyField(User)
     pic = CharField()
 
-
+# Consider removing this table
 class Score(BaseModel):
     user_id = ForeignKeyField(User, unique=True)
     total_quiz_num = IntegerField(default=0)
@@ -122,11 +122,16 @@ class SavedQuizzes(BaseModel):
 # Keep track of user scores on saved quizzes
 # Be able to show score for a specific day
 # Be able to show overall trend
+# If a saved quiz, brings in quiz_id
+# If a quickquiz, should not include quiz_id
+# Should allow for graphs/information about what type of questions (+, -, *) are stronger, weaker, etc.
 class UserScores(BaseModel):
     user_id = ForeignKeyField(User, unique=False)
-    quiz_id = ForeignKeyField(SavedQuizzes, unique=False)
+    quiz_id = ForeignKeyField(SavedQuizzes, null=True, unique=False)
+    quiz_type = CharField(default="+")
     questions_correct = IntegerField(default=0)
     questions_wrong = IntegerField(default=0)
+    questions_total = IntegerField(default=0)
     date_taken = DateTimeField(default=datetime.datetime.now)
 
 

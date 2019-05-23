@@ -128,9 +128,11 @@ body {
 #profile-pic {
   display: inline-block;
   position: relative;
-  z-index: 3;
-  max-width: 15%;
+  border: 0.25rem solid red;
+  max-width: 10%;
   height: auto;
+  top: -40px;
+  left: -280px;
 }
 
 #quiz-list {

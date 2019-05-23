@@ -23,22 +23,22 @@
             {% endfor %}
             </ul>
         </div>
-        <div class="row" id="overall-scores">
-            Overall Score:
-            {% for score in overall_scores %}
-            <ul>
-                <li>Total questions answered correctly: {{ score.total_questions_correct }}</li>
-                <li>Total questions answered incorrectly: {{ score.total_questions_wrong }}</li>
-            </ul>
-            {% endfor %}
-        </div>
+        <!--<div class="row" id="overall-scores">-->
+            <!--Overall Score:-->
+            <!--{% for score in overall_scores %}-->
+            <!--<ul>-->
+                <!--<li>Total questions answered correctly: {{ score.total_questions_correct }}</li>-->
+                <!--<li>Total questions answered incorrectly: {{ score.total_questions_wrong }}</li>-->
+            <!--</ul>-->
+            <!--{% endfor %}-->
+        <!--</div>-->
         <div id="option-btns">
             {% if selected_user_info.pic=="" %}
             <button type="button" class="btn btn-info" data-toggle="modal" data-target="#profileModal">
                 Upload profile image
             </button>
             {% else %}
-            <a href="{{ url_for('remove_file', filename=selected_user_info.pic) }}">Remove profile image</a>
+            <a href="{{ url_for('remove_file', filename=selected_user_info.pic) }}" class="btn btn-info">Remove profile image</a>
             {% endif %}
         </div>
     </div>
