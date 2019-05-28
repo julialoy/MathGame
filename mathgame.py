@@ -366,6 +366,7 @@ def startquickquiz():
     session['current_num_correct'] = 0
     session['current_num_incorrect'] = 0
     session['current_user_score'] = current_user_score.id
+
     # Add a new row instead (above)
 
     # q = (models.UserScores
