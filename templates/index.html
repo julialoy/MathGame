@@ -22,18 +22,18 @@
         <table class="table table-bordered table-dark" id="tenframe-table-one">
             <tbody>
             <tr>
-                <td><p id="sphere"></p></td>
-                <td><p id="sphere"></p></td>
-                <td><p id="sphere"></p></td>
-                <td><p id="sphere"></p></td>
-                <td><p id="sphere"></p></td>
+                <td><p class="sphere"></p></td>
+                <td><p class="sphere"></p></td>
+                <td><p class="sphere"></p></td>
+                <td><p class="sphere"></p></td>
+                <td><p class="sphere"></p></td>
             </tr>
             <tr>
-                <td><p id="sphere"></p></td>
-                <td><p id="sphere"></p></td>
-                <td><p id="sphere"></p></td>
-                <td><p id="sphere"></p></td>
-                <td><p id="sphere"></p></td>
+                <td><p class="sphere"></p></td>
+                <td><p class="sphere"></p></td>
+                <td><p class="sphere"></p></td>
+                <td><p class="sphere"></p></td>
+                <td><p class="sphere"></p></td>
             </tr>
             </tbody>
         </table>
@@ -41,18 +41,18 @@
         <table class="table table-bordered table-dark" id="tenframe-table-two">
             <tbody>
             <tr>
-                <td><p id="sphere"></p></td>
-                <td><p id="sphere"></p></td>
-                <td><p id="sphere"></p></td>
-                <td><p id="sphere"></p></td>
-                <td><p id="sphere"></p></td>
+                <td><p class="sphere"></p></td>
+                <td><p class="sphere"></p></td>
+                <td><p class="sphere"></p></td>
+                <td><p class="sphere"></p></td>
+                <td><p class="sphere"></p></td>
             </tr>
             <tr>
-                <td><p id="sphere"></p></td>
-                <td><p id="sphere"></p></td>
-                <td><p id="sphere"></p></td>
-                <td><p id="sphere"></p></td>
-                <td><p id="sphere"></p></td>
+                <td><p class="sphere"></p></td>
+                <td><p class="sphere"></p></td>
+                <td><p class="sphere"></p></td>
+                <td><p class="sphere"></p></td>
+                <td><p class="sphere"></p></td>
             </tr>
             </tbody>
         </table>
@@ -60,11 +60,10 @@
     </div>
     <div class="container d-flex-col col-3 align-self-stretch" id="sidebar">
         <p id="welcome-message">Welcome {{ current_user.username }}!</p>
-        <p>{{ current_user.username }} is currently taking</p>
         {% if session['current_quiz_desc'] %}
-            <p>{{ session['current_quiz_desc'] }}</p>
+            <p>You are taking {{ session['current_quiz_desc'] }}</p>
         {% else %}
-            <p>No quizzes!</p>
+            <p>You aren't taking a quiz right now!</p>
         {% endif %}
 
         <ul>

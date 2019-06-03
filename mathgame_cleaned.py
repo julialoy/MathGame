@@ -1,4 +1,3 @@
-# Rewrote mathgame.py to clean up
 from datetime import datetime
 import operator
 import os
@@ -61,10 +60,6 @@ class Test:
         self.test_type = test_type
         self.test_questions_answers = test_questions_answers
         self.test_length = check_test_length(test_length, self.test_questions_answers)
-        # if test_length == -1 or test_length > len(self.test_questions_answers):
-        #    self.test_length = len(self.test_questions_answers)
-        # else:
-        #    self.test_length = test_length
         self.test_questions = random.sample(list(self.test_questions_answers), self.test_length)
 
     def test_type(self):
@@ -238,7 +233,14 @@ def index():
     if not current_user.is_authenticated:
         return render_template('login.html')
     else:
-        return render_template('index.html')
+        selected_user = models.User.get(models.User.id == current_user.id)
+        quiz_list = (models.SavedQuizzes.select()
+                     .join(models.User, on=(models.SavedQuizzes.user_id == models.User.id))
+                     .where(models.User.id == current_user.id))
+        return render_template('index.html',
+                               selected_user=selected_user,
+                               quiz_list=quiz_list
+                               )
 
 
 @app.route('/profile', methods=["GET", "POST"])
@@ -252,6 +254,7 @@ def profile():
                      .join(models.User, on=(models.UserScores.user_id == models.User.id))
                      .where(models.User.id == current_user.id))
     quiz_types = [quiz.quiz_type for quiz in total_quizzes]
+
     return render_template('profile.html',
                            selected_user=selected_user,
                            quiz_list=quiz_list,
@@ -419,7 +422,22 @@ def startsavedquiz(saved_quiz_id):
 @app.route('/question', methods=["GET", "POST"])
 @login_required
 def question():
-    pass
+    try:
+        len(session['current_quiz'])
+    except KeyError:
+        return jsonify(question="You haven't started a quiz!")
+    else:
+        if len(session['current_quiz']) >= 1:
+            new_question = session['current_quiz'].pop()
+            session['current_quiz'] = session['current_quiz']
+            return jsonify(question=new_question)
+        else:
+            current_correct = session['current_num_correct']
+            current_incorrect = session['current_num_incorrect']
+            return jsonify(question="End of Quiz!",
+                           current_correct=current_correct,
+                           current_incorrect=current_incorrect,
+                           )
 
 
 @app.route('/checkanswer', methods=["GET", "POST"])

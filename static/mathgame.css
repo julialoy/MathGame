@@ -128,7 +128,7 @@ body {
 #profile-pic {
   display: inline-block;
   position: relative;
-  border: 0.25rem solid red;
+  border: 0.25rem solid #17a2b8;
   max-width: 10%;
   height: auto;
   top: -40px;
@@ -204,7 +204,7 @@ body {
       padding: .25rem;
     }
 
-    #sphere {
+    .sphere {
       height: 3rem;
       width: 3rem;
       background-color: #212529;
@@ -239,40 +239,3 @@ body {
   }
 
 }
-
-/* UNUSED STYLES */
-
-/*#character {
-  padding-top: .25rem;
-  padding-bottom: .25rem;
-}
-
-#left-eye {
-  height: 20px;
-  width: 20px;
-  background-color: #555;
-  border-radius: 50%;
-}
-
-#right-eye {
-  height: 20px;
-  width: 20px;
-  background-color: blue;
-  border-radius: 50%;
-}
-
-#left-pupil,
-#right-pupil {
-  height: 10px;
-  width: 10px;
-  background-color: black;
-  border-radius: 50%;
-}
-
-#triangle {
-  width: 0;
-  height: 0;
-  border-left: 25px solid transparent;
-  border-right: 25px solid transparent;
-  border-top: 50px solid purple;
-}*/
