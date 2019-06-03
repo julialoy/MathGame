@@ -4,13 +4,7 @@
 <div class="row main-row fill" id="main-profile">
     <div class="container d-flex-col col-8 align-self-start justify-content-center py-4" id="profile-container">
         <div class="h5 text-center col-sm" id="profile-heading">
-            {% if selected_user_info.pic == "" %}
-<!--            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#profileModal">
-                Upload profile image
-            </button>-->
-            {% else %}
-            <img src="{{ url_for('upload_file', filename=selected_user_info.pic) }}" class="border border-dark rounded-circle" id="profile-pic">
-            {% endif %}
+            <img src="{{ url_for('upload_file', filename=selected_user.pic) }}" class="rounded-circle" id="profile-pic">
             {{ current_user.username }}'s Profile
         </div>
         <div class="row" id="quiz-list">
@@ -33,12 +27,14 @@
             <!--{% endfor %}-->
         <!--</div>-->
         <div id="option-btns">
-            {% if selected_user_info.pic=="" %}
+            {% if selected_user_info.pic=="math_profile_blank.png" %}
             <button type="button" class="btn btn-info" data-toggle="modal" data-target="#profileModal">
                 Upload profile image
             </button>
             {% else %}
-            <a href="{{ url_for('remove_file', filename=selected_user_info.pic) }}" class="btn btn-info">Remove profile image</a>
+            <a href="{{ url_for('remove_pic', filename=selected_user.pic) }}" class="btn btn-info">
+                Remove profile image
+            </a>
             {% endif %}
         </div>
     </div>

@@ -18,18 +18,21 @@ class BaseModel(Model):
 class User(UserMixin, BaseModel):
     username = CharField(unique=True)
     password = CharField(max_length=25)
+    pic = CharField(default="math_profile_blank.png")
     current_quiz = TextField(default="[]")
     is_admin = BooleanField(default=False)
     is_student = BooleanField(default=True)
     is_teacher = BooleanField(default=False)
 
     @classmethod
-    def create_user(cls, username, password, current_quiz="[]", admin=False, student=True, teacher=False):
+    def create_user(cls, username, password, pic="math_profile_blank.png", current_quiz="[]", admin=False,
+                    student=True, teacher=False):
         try:
             with DATABASE.transaction():
                 cls.create(
                     username=username,
                     password=generate_password_hash(password),
+                    pic=pic,
                     current_quiz=current_quiz,
                     is_admin=admin,
                     is_student=student,
@@ -51,16 +54,16 @@ class User(UserMixin, BaseModel):
         return False
 
 
-class UserInfo(BaseModel):
-    user = ForeignKeyField(User)
-    pic = CharField()
+# class UserInfo(BaseModel):
+#     user = ForeignKeyField(User)
+#     pic = CharField()
 
 # Consider removing this table
-class Score(BaseModel):
-    user_id = ForeignKeyField(User, unique=True)
-    total_quiz_num = IntegerField(default=0)
-    total_questions_correct = IntegerField(default=0)
-    total_questions_wrong = IntegerField(default=0)
+# class Score(BaseModel):
+#     user_id = ForeignKeyField(User, unique=True)
+#     total_quiz_num = IntegerField(default=0)
+#     total_questions_correct = IntegerField(default=0)
+#     total_questions_wrong = IntegerField(default=0)
 
 
 class SavedQuizzes(BaseModel):
@@ -137,5 +140,5 @@ class UserScores(BaseModel):
 
 def initialize():
     DATABASE.connect()
-    DATABASE.create_tables([User, UserInfo, Score, SavedQuizzes, UserScores], safe=True)
+    DATABASE.create_tables([User, SavedQuizzes, UserScores], safe=True)
     DATABASE.close()
