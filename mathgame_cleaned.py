@@ -1,7 +1,5 @@
 from datetime import datetime
-import operator
 import os
-import random
 
 from flask import (Flask, flash, g, jsonify, redirect, render_template, request,
                    send_from_directory, session, url_for)
@@ -29,106 +27,6 @@ def allowed_file(filename):
     Checks that the extension is in ALLOWED_EXTENSIONS.
     """
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-def check_test_length(t_length, t_q_and_a):
-    """Checks the length of the test.
-    Takes a test length as an integer and a dictionary of questions and answers.
-    """
-    if t_length == -1 or t_length > len(t_q_and_a):
-        return len(t_q_and_a)
-    else:
-        return t_length
-
-
-def is_in_dict(k, v, dictionary, allow_neg_ans):
-    """Adds the math question and its answer to the math facts dictionary.
-    If the quiz does not allow a negative number as an answer,
-    no questions with a negative answer will be added to the dictionary.
-    """
-    if allow_neg_ans is True:
-        if k not in dictionary:
-            dictionary[k] = v
-    elif allow_neg_ans is False:
-        if k not in dictionary and v >= 0:
-            dictionary[k] = v
-
-
-class Test:
-    """Creates the math test."""
-    def __init__(self, test_type, test_questions_answers, test_length=-1):
-        self.test_type = test_type
-        self.test_questions_answers = test_questions_answers
-        self.test_length = check_test_length(test_length, self.test_questions_answers)
-        self.test_questions = random.sample(list(self.test_questions_answers), self.test_length)
-
-    def test_type(self):
-        return self.test_type
-
-    def list_questions(self):
-        for qstn in self.test_questions_answers:
-            print(qstn)
-
-    def test_length(self):
-        return self.test_length
-
-    def grab_question(self):
-        return self.test_questions.pop()
-
-    def grab_answer(self, quiz_question):
-        return self.test_questions_answers[quiz_question]
-
-
-class MathFacts:
-    """Creates the set of questions and answers to feed into the Test class.
-    Takes an operator (+, -, *), whether to allow answers < 0, and start and end numbers.
-    """
-    def __init__(self, math_op="+", start_num=0, end_num=10, neg_answers=False):
-        self.math_op = math_op
-        self.start_num = start_num
-        self.end_num = end_num
-        self.neg_answers = neg_answers
-        self.facts = {}
-
-    math_operators = {"+": operator.add,
-                      "-": operator.sub,
-                      "*": operator.mul,
-                      }
-
-    def create_facts(self):
-        """Creates and returns a dictionary of the selected math facts to test.
-        Keys are the equations, values are the answers to the equation.
-        All allowed combinations are added to the facts dictionary.
-        """
-        first_num = 0
-
-        while first_num <= self.end_num:
-            # Iterates through a range of numbers (+1) to build a dictionary of equations as keys and their
-            # answers as values
-            for i in range(self.start_num, self.end_num+1):
-                # Builds the equation with the first number for the equation, the operator symbol, and the second
-                # number for the equation
-                key1 = "{} {} {}".format(first_num, self.math_op, i)
-                # Retrieves the correct operation from the math_operators dictionary and performs that operation on
-                # first_num and i, with first_num being the first number of the equation and i
-                # being the second number in the equation. The value stored in the variable is the answer to the
-                # equation.
-                value1 = self.math_operators[self.math_op](first_num, i)
-                # Uses the is_in_dict function to add the equation and the equation's answer to the facts dictionar
-                # based on whether negative answers are allowed or not.
-                is_in_dict(key1, value1, self.facts, self.neg_answers)
-
-                # For all equations where the two numbers are not the same, creates a second equation reversing
-                # the order of the numbers to get all possible allowed combinations. This ensures the test taker
-                # can add 5 + 3 and not just 3 + 5.
-                if first_num != i:
-                    key2 = "{} {} {}".format(i, self.math_op, first_num)
-                    value2 = self.math_operators[self.math_op](i, first_num)
-                    is_in_dict(key2, value2, self.facts, self.neg_answers)
-                    key3 = "{} {} {}".format(i, self.math_op, i)
-                    value3 = self.math_operators[self.math_op](i, i)
-                    is_in_dict(key3, value3, self.facts, self.neg_answers)
-            first_num += 1
 
 
 @login_manager.user_loader
@@ -314,9 +212,17 @@ def startquickquiz():
     """Starts a quiz with 10 random addition facts using numbers from 0 to 10 and adds the quiz to the current
     session for the current user.
     """
-    new_facts = MathFacts()
-    new_facts.create_facts()
-    new_test = Test("Basic Addition Math Facts", new_facts.facts, 10)
+    new_test = models.SavedQuizzes(
+        user=current_user.id,
+        quiz_name="Basic Addition Math Facts from 0 to 10",
+        created_by=current_user.id,
+        assigned_by=None,
+        math_op="+",
+        starting_num=0,
+        ending_num=10,
+        allow_neg_answers=False,
+        quiz_length=10
+    )
     current_user_score = models.UserScores.create(
         user_id=current_user.id,
         quiz_id=0,
@@ -326,8 +232,12 @@ def startquickquiz():
         questions_total=10,
         date_take=datetime.now()
     )
-    session['current_facts'] = new_facts.facts
-    session['current_quiz'] = new_test
+    # create_facts() and create_test() are methods on the SavedQuizzes model.
+    # This quiz is not saved to the database.
+    facts = new_test.create_facts()
+    quiz = new_test.create_test(facts)
+    session['current_quiz'] = quiz
+    session['current_facts'] = facts
     session['current_num_correct'] = 0
     session['current_num_incorrect'] = 0
     session['current_user_score'] = current_user_score.id
@@ -356,21 +266,21 @@ def startcustomquiz():
         else:
             quiz_end = 10
 
-        cust_facts = MathFacts(quiz_op, quiz_start, quiz_end)
-        cust_facts.create_facts()
-        cust_quiz = Test(quiz_desc, cust_facts.facts, quiz_length)
+        new_cust_quiz = models.SavedQuizzes(
+            user=current_user.id,
+            quiz_name=quiz_desc,
+            created_by=current_user.id,
+            assigned_by=None,
+            math_op=quiz_op,
+            starting_num=quiz_start,
+            ending_num=quiz_end,
+            allow_neg_answers=False,
+            quiz_length=quiz_length
+        )
+        cust_facts = new_cust_quiz.create_facts()
+        cust_quiz = new_cust_quiz.create_test(cust_facts)
 
-        if quiz_setup['save_quiz'] == 'yes':
-            new_cust_quiz = models.SavedQuizzes(user=current_user.id,
-                                                quiz_name=quiz_desc,
-                                                created_by=current_user.id,
-                                                assigned_by=current_user.id,
-                                                math_op=quiz_op,
-                                                starting_num=quiz_start,
-                                                ending_num=quiz_end,
-                                                allow_neg_answers=False,
-                                                quiz_length=quiz_length,
-                                                )
+        if quiz_setup['save-quiz'] == 'yes':
             new_cust_quiz.save()
             cust_id = new_cust_quiz.id
         else:
@@ -385,8 +295,8 @@ def startcustomquiz():
             questions_total=quiz_length,
             date_taken=datetime.now()
         )
-        session['current_facts'] = cust_quiz.test_questions_answers
-        session['current_quiz'] = cust_quiz.test_questions
+        session['current_facts'] = cust_facts
+        session['current_quiz'] = cust_quiz
         session['current_num_correct'] = 0
         session['current_num_incorrect'] = 0
         session['current_user_score'] = current_user_score.id
@@ -419,7 +329,7 @@ def startsavedquiz(saved_quiz_id):
     return redirect(url_for('index'))
 
 
-@app.route('/question', methods=["GET", "POST"])
+@app.route('/question', methods=["GET"])
 @login_required
 def question():
     try:
@@ -443,7 +353,27 @@ def question():
 @app.route('/checkanswer', methods=["GET", "POST"])
 @login_required
 def checkanswer():
-    pass
+    data = request.form
+    qstn = data['question']
+    try:
+        user_answer = int(data['userAnswer'])
+    except ValueError:
+        return jsonify(answer="Try again! Please enter a number.")
+    else:
+        if user_answer == session['current_facts'][qstn]:
+            q = (models.UserScores
+                 .update({models.UserScores.questions_correct: models.UserScores.questions_correct + 1})
+                 .where(models.UserScores.id == session['current_user_score']))
+            q.execute()
+            session['current_num_correct'] += 1
+            return jsonify(answer="CORRECT!")
+        else:
+            q = (models.UserScores
+                 .update({models.UserScores.questions_wrong: models.UserScores.questions_wrong + 1})
+                 .where(models.UserScores.id == session['current_user_score']))
+            q.execute()
+            session['current_num_incorrect'] += 1
+            return jsonify(answer="Sorry! That's not the right answer.")
 
 
 if __name__ == '__main__':
