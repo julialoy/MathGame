@@ -269,16 +269,14 @@ def startcustomquiz():
         new_cust_quiz = models.SavedQuizzes(
             user=current_user.id,
             quiz_name=quiz_desc,
-            created_by=current_user.id,
-            assigned_by=None,
+            created_by=current_user.username,
+            assigned_by=current_user.username,
             math_op=quiz_op,
             starting_num=quiz_start,
             ending_num=quiz_end,
             allow_neg_answers=False,
             quiz_length=quiz_length
         )
-        cust_facts = new_cust_quiz.create_facts()
-        cust_quiz = new_cust_quiz.create_test(cust_facts)
 
         if quiz_setup['save-quiz'] == 'yes':
             new_cust_quiz.save()
@@ -295,6 +293,8 @@ def startcustomquiz():
             questions_total=quiz_length,
             date_taken=datetime.now()
         )
+        cust_facts = new_cust_quiz.create_facts()
+        cust_quiz = new_cust_quiz.create_test(cust_facts)
         session['current_facts'] = cust_facts
         session['current_quiz'] = cust_quiz
         session['current_num_correct'] = 0
