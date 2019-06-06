@@ -19,7 +19,12 @@ const splitOnOperator = (myString) => {
 //let questionNumbers = splitOnOperator($.trim($('#quiz-question').text()).split(" = ")[0]);
 
 //Check whether to use ten frames
-const useTenframes = (numbers) => {
+const useTenframes = (numbers, qst) => {
+  if (qst.includes('*') || qst.includes('/')) {
+    const tenFrame = false;
+    return tenFrame;
+  }
+
   if (numbers[0] < 11 && numbers[1] < 11) {
     const tenFrame = true;
     return tenFrame;
@@ -30,11 +35,11 @@ const useTenframes = (numbers) => {
 };
 
 //Fill two ten frames per the current quiz question
-const fillTenframe = (numbers) => {
+const fillTenframe = (numbers, qst) => {
   //const testNumOne = $.trim($('#quiz-question').text()).split(" = ")[0];
   //const numOne = splitOnOperator(questionNumbers);
   //if (questionNumbers[0] < 11 && questionNumbers[1] < 11) {
-  if (useTenframes(numbers) === true) {
+  if (useTenframes(numbers, qst) === true) {
       const tableOne = document.getElementById('tenframe-table-one');
       const tableTwo = document.getElementById('tenframe-table-two');
       const tableOneCells = tableOne.getElementsByTagName("td");
@@ -96,12 +101,10 @@ const nextQuestion = () => {
       $('#show-tenframe').hide();
       $('#quiz-question').append(`<p>You answered ${data.current_correct} questions correctly!</p>`);
       $('#quiz-question').append(`<p>You answered ${data.current_incorrect} questions incorrectly.</p>`);
-/*      $('#quiz-question').append(`<p>You have answered ${data.overall_correct} questions correctly overall!</p>`);
-      $('#quiz-question').append(`<p>You have answered ${data.overall_incorrect} questions incorrectly overall!</p>`);*/
     } else {
       $("#quiz-question").append(`<h3>${data.question} = ?</h3>`);
       const quizNumbers = splitOnOperator($.trim($('#quiz-question').text()).split(" = ")[0]);
-      if (useTenframes(quizNumbers) === true) {
+      if (useTenframes(quizNumbers, data.question) === true) {
         $('#show-tenframe').show();
       } else {
         $('#show-tenframe').hide();
@@ -130,7 +133,7 @@ $.ajax({url:"/question", dataType:"json"}).then( data => {
     $('#quiz-question').append(`<h3>${data.question} = ?</h3>`);
     $('#get-next-btn').hide();
     const quizNumbers = splitOnOperator($.trim($('#quiz-question').text()).split(" = ")[0]);
-    if (useTenframes(quizNumbers) === false) {
+    if (useTenframes(quizNumbers, data.question) === false) {
       $('#show-tenframe').hide();
     }
   }
