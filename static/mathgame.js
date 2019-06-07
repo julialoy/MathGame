@@ -15,12 +15,12 @@ const splitOnOperator = (myString) => {
   }
 };
 
-//Get question numbers
-//let questionNumbers = splitOnOperator($.trim($('#quiz-question').text()).split(" = ")[0]);
-
 //Check whether to use ten frames
 const useTenframes = (numbers, qst) => {
-  if (qst.includes('*') || qst.includes('/')) {
+  if (qst.includes('*')) {
+    const tenFrame = false;
+    return tenFrame;
+  } else if (qst.includes('/')) {
     const tenFrame = false;
     return tenFrame;
   }
@@ -36,9 +36,6 @@ const useTenframes = (numbers, qst) => {
 
 //Fill two ten frames per the current quiz question
 const fillTenframe = (numbers, qst) => {
-  //const testNumOne = $.trim($('#quiz-question').text()).split(" = ")[0];
-  //const numOne = splitOnOperator(questionNumbers);
-  //if (questionNumbers[0] < 11 && questionNumbers[1] < 11) {
   if (useTenframes(numbers, qst) === true) {
       const tableOne = document.getElementById('tenframe-table-one');
       const tableTwo = document.getElementById('tenframe-table-two');
@@ -61,20 +58,16 @@ const fillTenframe = (numbers, qst) => {
 
 //Change to two empty ten frames
 const emptyTenframe = () => {
-  //if (useTenframes() === true) {
-      const tableOne = document.getElementById('tenframe-table-one');
-      const tableTwo = document.getElementById('tenframe-table-two');
-      const tableOneCells = tableOne.getElementsByTagName("td");
-      const tableTwoCells = tableTwo.getElementsByTagName("td");
-      for (i = 0; i < 10; i++) {
-        const redSphereOne = tableOneCells[i].firstChild;
-        const redSphereTwo = tableTwoCells[i].firstChild;
-        redSphereOne.setAttribute("style", "background-color:#212529");
-        redSphereTwo.setAttribute("style", "background-color:#212529");
-      }
-  //} else {
-  //  $('#show-tenframe').hide();
-  //}
+  const tableOne = document.getElementById('tenframe-table-one');
+  const tableTwo = document.getElementById('tenframe-table-two');
+  const tableOneCells = tableOne.getElementsByTagName("td");
+  const tableTwoCells = tableTwo.getElementsByTagName("td");
+  for (i = 0; i < 10; i++) {
+    const redSphereOne = tableOneCells[i].firstChild;
+    const redSphereTwo = tableTwoCells[i].firstChild;
+    redSphereOne.setAttribute("style", "background-color:#212529");
+    redSphereTwo.setAttribute("style", "background-color:#212529");
+  }
 };
 
 //Get the next quiz question
@@ -194,7 +187,6 @@ $('#user-answer').submit( evt => {
       $("#quiz-answer").append(data.answer);
       $('#user-answer-text').val("");
     } else if (data.answer === "CORRECT!") {
-      //$('#game-container').removeClass("bg-primary");
       $('#game-container').css("background-color", "mediumseagreen");
       $('#quiz-question').hide();
       $('#quiz-answer').empty();
@@ -205,7 +197,6 @@ $('#user-answer').submit( evt => {
       $('#tenframes').prop('hidden', true);
       setTimeout(nextQuestion, 2000);
     } else if (data.answer === "Sorry! That's not the right answer.") {
-      //$('#game-container').removeClass("bg-primary");
       $('#game-container').css("background-color", "indianred");
       $('#quiz-question').hide();
       $('#quiz-answer').empty();
@@ -221,13 +212,14 @@ $('#user-answer').submit( evt => {
 
 //Show and hide the ten frame for the current quiz question when button clicked
 $('#show-tenframe').click( evt => {
+  const quizQuestion = $('#quiz-question').text()
   const quizNumbers = splitOnOperator($.trim($('#quiz-question').text()).split(" = ")[0]);
   const tenframeBtn = $(evt.target);
   const btnText = tenframeBtn.text();
   if (btnText === 'Show Ten Frame') {
     $('#tenframes').prop('hidden', false);
     $('#show-tenframe').html('Hide Ten Frame');
-    fillTenframe(quizNumbers);
+    fillTenframe(quizNumbers, quizQuestion);
   } else if (btnText === 'Hide Ten Frame') {
     $('#tenframes').prop('hidden', true);
     $('#show-tenframe').html('Show Ten Frame');
