@@ -295,8 +295,10 @@ def startcustomquiz():
         )
         cust_facts = new_cust_quiz.create_facts()
         cust_quiz = new_cust_quiz.create_test(cust_facts)
+        cust_desc = new_cust_quiz.quiz_name
         session['current_facts'] = cust_facts
         session['current_quiz'] = cust_quiz
+        session['current_quiz_desc'] = cust_desc
         session['current_num_correct'] = 0
         session['current_num_incorrect'] = 0
         session['current_user_score'] = current_user_score.id
@@ -337,6 +339,7 @@ def question():
     except KeyError:
         return jsonify(question="You haven't started a quiz!")
     else:
+        print(session['current_quiz_desc'])
         if len(session['current_quiz']) >= 1:
             new_question = session['current_quiz'].pop()
             session['current_quiz'] = session['current_quiz']
