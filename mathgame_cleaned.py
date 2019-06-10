@@ -181,7 +181,7 @@ def uploader():
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         q = models.User.update(
             pic=filename
-        ).where(models.User.user_id == selected_user)
+        ).where(models.User.id == selected_user)
         q.execute()
         return redirect(url_for('profile', user_id=selected_user))
 
@@ -192,7 +192,7 @@ def upload_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
-@app.route('/removeimage/<filename>', methods=["GET", "POST"])
+@app.route('/removeimage', methods=["GET", "POST"])
 @login_required
 def remove_pic():
     """Removes a profile picture from a user's profile.
@@ -200,8 +200,8 @@ def remove_pic():
     """
     selected_user = models.User.get(models.User.id == current_user.id)
     q = models.User.update(
-        pic=""
-    ).where(models.User.user_id == selected_user)
+        pic="math_profile_blank.png"
+    ).where(models.User.id == selected_user)
     q.execute()
     return redirect(url_for('profile'))
 

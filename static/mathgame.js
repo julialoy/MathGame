@@ -225,3 +225,13 @@ $('#show-tenframe').click( evt => {
     $('#show-tenframe').html('Show Ten Frame');
   }
 });
+
+//Make profile image show profile pic modal
+$('#profile-pic').click( evt => {
+  $('#profileModal').modal('show');
+});
+
+//Makes remove pic button function
+$('#remove-pic').click( evt => {
+  location.href = '/removeimage';
+});

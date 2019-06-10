@@ -54,18 +54,6 @@ class User(UserMixin, BaseModel):
         return False
 
 
-# class UserInfo(BaseModel):
-#     user = ForeignKeyField(User)
-#     pic = CharField()
-
-# Consider removing this table
-# class Score(BaseModel):
-#     user_id = ForeignKeyField(User, unique=True)
-#     total_quiz_num = IntegerField(default=0)
-#     total_questions_correct = IntegerField(default=0)
-#     total_questions_wrong = IntegerField(default=0)
-
-
 class SavedQuizzes(BaseModel):
     user = ForeignKeyField(User, unique=False)
     quiz_name = CharField(max_length=250, unique=True)
@@ -76,7 +64,6 @@ class SavedQuizzes(BaseModel):
     ending_num = IntegerField(default=10)
     allow_neg_answers = BooleanField(default=False)
     quiz_length = IntegerField(default=-1)
-    #quiz_questions_answers = BareField()
 
     def create_facts(self):
         facts = {}
@@ -125,8 +112,6 @@ class SavedQuizzes(BaseModel):
 # Keep track of user scores on saved quizzes
 # Be able to show score for a specific day
 # Be able to show overall trend
-# If a saved quiz, brings in quiz_id
-# If a quickquiz, should not include quiz_id
 # Should allow for graphs/information about what type of questions (+, -, *) are stronger, weaker, etc.
 class UserScores(BaseModel):
     user_id = ForeignKeyField(User, unique=False)
