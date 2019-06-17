@@ -143,6 +143,7 @@ $('#register-form').submit( evt => {
     $('#createUsername').val("");
     $('#createPassword').val("");
     $('#confirmPassword').val("");
+    $('#adminCheck').prop("checked", false);
     evt.preventDefault();
   }
 });

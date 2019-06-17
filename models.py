@@ -123,7 +123,56 @@ class UserScores(BaseModel):
     date_taken = DateTimeField(default=datetime.datetime.now)
 
 
+class Questions(BaseModel):
+    question = CharField()
+    answer = IntegerField()
+    question_type = CharField(default="Equation")
+    question_op = CharField()
+
+    @classmethod
+    def populate(cls, qstn_op, start_num=0, end_num=10):
+        """Populates Questions table with questions based on the mathematical operator, start, and end number (inclusive).
+        Cannot be used to add word problems.
+        """
+        operators = {'+': operator.add, '-': operator.sub, '*': operator.mul}
+        first = start_num
+        while first <= end_num:
+            for i in range(start_num, end_num+1):
+                qstn_text = "{} {} {}".format(first, qstn_op, i)
+                ans = operators[qstn_op](first, i)
+                with DATABASE.transaction():
+                    cls.create(
+                        question=qstn_text,
+                        answer=ans,
+                        question_type="Equation",
+                        question_op=qstn_op
+                    )
+
+            first += 1
+
+    @classmethod
+    def mass_populate(cls, qstn_op):
+        """Populates table with all possible equations from 0 to 100 inclusive based on the selected math operator.
+        Cannot be used to add word problems.
+        """
+        operators = {'+': operator.add, '-': operator.sub, '*': operator.mul}
+        current = 0
+        while current <= 100:
+            for i in range(0, 101):
+                qstn_text = "{} {} {}".format(current, qstn_op, i)
+                ans = operators[qstn_op](current, i)
+                with DATABASE.transaction():
+                    cls.create(
+                        question=qstn_text,
+                        answer=ans,
+                        question_type="Equation",
+                        question_op=qstn_op
+                    )
+            current += 1
+
+
+
 def initialize():
     DATABASE.connect()
-    DATABASE.create_tables([User, SavedQuizzes, UserScores], safe=True)
+    DATABASE.create_tables([User, SavedQuizzes, UserScores, Questions], safe=True)
     DATABASE.close()

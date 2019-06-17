@@ -6,7 +6,6 @@
         <div class="text-center mb-4">
             <h1 class="h3 mb-3 font-weight-normal text-info">Math Quiz!</h1>
         </div>
-
         <div class="form-label-group">
             <input type="text" id="createUsername" class="form-control" placeholder="Username" name="username" required autofocus>
             <label for="createUsername">Pick username</label>
@@ -20,12 +19,20 @@
         <div class="form-label-group">
             <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm Password" name="confirm-password" required>
             <label for="confirmPassword">Confirm Password</label>
-        </div>
 
-        <button class="btn btn-lg btn-info btn-block" type="submit" name="register-btn" id="register-btn">Register!</button>
-        <p class="mt-5 mb-3 text-center text-info">
-            Already have an account? <a class="text-info" href="{{ url_for('index') }}">Go Sign In</a>
-        </p>
+        </div>
+        <div class="form-label-group">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" val="" name="is-admin" aria-label="Checkbox for admin" id="adminCheck">
+                <label class="form-check-label" for="adminCheck">Administrator</label>
+            </div>
+        </div>
+        <button class="btn btn-lg btn-info btn-block" type="submit" name="register-btn" id="register-btn">
+            Register!
+        </button>
     </form>
+    <p class="mt-5 mb-3 text-center text-info">
+            Already have an account? <a class="text-info" href="{{ url_for('index') }}">Go Sign In</a>
+    </p>
 </div>
 {% endblock %}

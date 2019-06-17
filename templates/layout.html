@@ -30,25 +30,31 @@
         {% endif %}
         {% endwith %}
     </div>
-    {% if current_user.is_authenticated %}
     <div class="container-fluid" id="navbar">
-        <nav class="navbar fixed-top navbar-dark bg-info">
-          <a class="navbar-brand" href="{{ url_for('index') }}">Math Game!</a>
-            <ul class="navbar-nav mr-auto mt-2 mt-lg-0 d-inline-flex flex-row">
-                <li class="nav-item"><a class="nav-item nav-link" href="{{ url_for('profile') }}">Profile</a></li>
-                <li class="nav-item"><a class="nav-item nav-link" href="{{ url_for('startquickquiz') }}">
-                    Start Quick Quiz
-                </a></li>
-                <li class="nav-item"><a class="nav-item nav-link" href="{{ url_for('startcustomquiz') }}">
-                    Start Custom Quiz
-                </a></li>
-                <li class="nav-item"><a class="nav-item nav-link" href="{{ url_for('logout') }}">
+    <nav class="navbar fixed-top navbar-dark bg-info">
+      <a class="navbar-brand" href="{{ url_for('index') }}">Math Game!</a>
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0 d-inline-flex flex-row">
+        {% if current_user.is_authenticated and not current_user.is_admin %}
+            <li class="nav-item"><a class="nav-item nav-link" href="{{ url_for('profile') }}">Profile</a></li>
+            <li class="nav-item"><a class="nav-item nav-link" href="{{ url_for('startquickquiz') }}">
+                Start Quick Quiz
+            </a></li>
+            <li class="nav-item"><a class="nav-item nav-link" href="{{ url_for('startcustomquiz') }}">
+                Start Custom Quiz
+            </a></li>
+            <li class="nav-item"><a class="nav-item nav-link" href="{{ url_for('logout') }}">
+                Sign Out
+            </a></li>
+        {% elif current_user.is_authenticated and current_user.is_admin %}
+            <li class="nav-item">
+                <a class="nav-item nav-link" href="{{ url_for('logout') }}">
                     Sign Out
-                </a></li>
-            </ul>
+                </a>
+            </li>
+        {% endif %}
+        </ul>
         </nav>
     </div>
-    {% endif %}
 
     {% block content %} {% endblock %}
 <!--    <div class="container" id="character">

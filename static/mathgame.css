@@ -167,6 +167,11 @@ body {
   color: #17a2b8;
 }
 
+/* ADMIN VIEW */
+#admin-page-title {
+  margin-top: 2rem;
+}
+
 /* MEDIA QUERIES */
 @media (min-width: 768px) {
     /* TEN FRAMES */

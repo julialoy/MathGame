@@ -1,4 +1,5 @@
 from datetime import datetime
+from functools import wraps
 import os
 
 from flask import (Flask, flash, g, jsonify, redirect, render_template, request,
@@ -20,6 +21,15 @@ app.secret_key = 'dshfjkrehtuia^&#C@@%&*(fdsh21243254235'
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
+
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if g.user.is_admin is False:
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 def allowed_file(filename):
@@ -67,12 +77,23 @@ def register():
     """
     if request.form:
         user_registration = request.form
+        if 'is-admin' in user_registration.keys():
+            is_admin = True
+        else:
+            is_admin = False
+
+        if is_admin is True:
+            is_student = False
+        else:
+            is_student = True
         username = user_registration['username']
-        password = user_registration['username']
+        password = user_registration['password']
         try:
             models.User.create_user(
                 username=username,
-                password=password
+                password=password,
+                admin=is_admin,
+                student=is_student,
             )
             return redirect(url_for('login'))
         except ValueError:
@@ -130,6 +151,8 @@ def index():
     """
     if not current_user.is_authenticated:
         return render_template('login.html')
+    elif current_user.is_admin:
+        return redirect(url_for('admin'))
     else:
         selected_user = models.User.get(models.User.id == current_user.id)
         quiz_list = (models.SavedQuizzes.select()
@@ -232,12 +255,11 @@ def startquickquiz():
         questions_total=10,
         date_take=datetime.now()
     )
-    # create_facts() and create_test() are methods on the SavedQuizzes model.
-    # This quiz is not saved to the database.
     facts = new_test.create_facts()
     quiz = new_test.create_test(facts)
     session['current_quiz'] = quiz
     session['current_facts'] = facts
+    session['current_quiz_desc'] = "Basic Addition Math Facts from 0 to 10"
     session['current_num_correct'] = 0
     session['current_num_incorrect'] = 0
     session['current_user_score'] = current_user_score.id
@@ -339,7 +361,6 @@ def question():
     except KeyError:
         return jsonify(question="You haven't started a quiz!")
     else:
-        print(session['current_quiz_desc'])
         if len(session['current_quiz']) >= 1:
             new_question = session['current_quiz'].pop()
             session['current_quiz'] = session['current_quiz']
@@ -377,6 +398,14 @@ def checkanswer():
             q.execute()
             session['current_num_incorrect'] += 1
             return jsonify(answer="Sorry! That's not the right answer.")
+
+
+@app.route('/admin', methods=["GET", "POST"])
+@login_required
+@admin_required
+def admin():
+    print("You are an admin")
+    return render_template('admin.html')
 
 
 if __name__ == '__main__':
