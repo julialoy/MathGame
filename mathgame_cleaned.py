@@ -82,7 +82,12 @@ def register():
         else:
             is_admin = False
 
-        if is_admin is True:
+        if 'is-teacher' in user_registration.keys():
+            is_teacher = True
+        else:
+            is_teacher = False
+
+        if is_admin or is_teacher is True:
             is_student = False
         else:
             is_student = True
@@ -94,6 +99,7 @@ def register():
                 password=password,
                 admin=is_admin,
                 student=is_student,
+                teacher=is_teacher
             )
             return redirect(url_for('login'))
         except ValueError:
