@@ -156,11 +156,10 @@ class Questions(BaseModel):
         Cannot be used to add word problems.
         """
         operators = {'+': operator.add, '-': operator.sub, '*': operator.mul}
-        current = 0
-        while current <= 100:
-            for i in range(0, 101):
-                qstn_text = "{} {} {}".format(current, qstn_op, i)
-                ans = operators[qstn_op](current, i)
+        for i in range(101):
+            for j in range(101):
+                qstn_text = "{} {} {}".format(i, qstn_op, j)
+                ans = operators[qstn_op](i, j)
                 with DATABASE.transaction():
                     cls.create(
                         question=qstn_text,
@@ -168,7 +167,6 @@ class Questions(BaseModel):
                         question_type="Equation",
                         question_op=qstn_op
                     )
-            current += 1
 
 
 
