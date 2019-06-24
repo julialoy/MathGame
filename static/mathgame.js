@@ -114,15 +114,6 @@ const nextQuestion = () => {
 //  window.removeEventListener('touchstart', onFirstTouch, false);
 //}, false);
 
-$(document).ready( function() {
-    var messages = "{{ get_flashed_messages() }}";
-    console.log(typeof messages);
-    console.log(messages.length);
-    if (messages !== '{{ get_flashed_messages() }}') {
-        $('#msgModal').modal('show');
-    };
-});
-
 //Get and display quiz question
 $.ajax({url:"/question", dataType:"json"}).then( data => {
   emptyTenframe();

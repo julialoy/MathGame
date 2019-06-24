@@ -7,6 +7,7 @@ from flask import (Flask, flash, g, jsonify, redirect, render_template, request,
 from flask_bcrypt import check_password_hash
 from flask_login import current_user, LoginManager, login_required, login_user, logout_user
 from werkzeug.utils import secure_filename
+from peewee import *
 
 import models
 
@@ -100,6 +101,7 @@ def register():
                                     student=is_student,
                                     teacher=is_teacher
                                     )
+            flash('Registration successful. Please log in.')
             return redirect(url_for('login'))
         except ValueError:
             return render_template('register.html')
@@ -125,7 +127,6 @@ def login():
             if check_password_hash(user.password, password):
                 session['username'] = username
                 login_user(user)
-                flash('Login successful')
                 return redirect(url_for('index'))
             else:
                 flash('That username or password is incorrect.')
@@ -416,7 +417,7 @@ def populate():
         quest_type = form['populate-questions']
         try:
             models.Questions.mass_populate(quest_type)
-        except ValueError:
+        except IntegrityError:
             flash('Unable to populate database.')
         else:
             flash('Database populated successfully.')

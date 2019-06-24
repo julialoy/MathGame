@@ -18,14 +18,14 @@ class BaseModel(Model):
 class User(UserMixin, BaseModel):
     username = CharField(unique=True)
     password = CharField(max_length=25)
-    pic = CharField(default="math_profile_blank.png")
-    current_quiz = TextField(default="[]")
+    pic = CharField(default='math_profile_blank.png')
+    current_quiz = TextField(default='[]')
     is_admin = BooleanField(default=False)
     is_student = BooleanField(default=True)
     is_teacher = BooleanField(default=False)
 
     @classmethod
-    def create_user(cls, username, password, pic="math_profile_blank.png", current_quiz="[]", admin=False,
+    def create_user(cls, username, password, pic='math_profile_blank.png', current_quiz='[]', admin=False,
                     student=True, teacher=False):
         try:
             with DATABASE.transaction():
@@ -39,7 +39,7 @@ class User(UserMixin, BaseModel):
                     is_teacher=teacher,
                 )
         except IntegrityError:
-            raise ValueError("Username already exists. Try again.")
+            raise ValueError('Username already exists. Try again.')
 
     def is_authenticated(self):
         return True
@@ -59,7 +59,7 @@ class SavedQuizzes(BaseModel):
     quiz_name = CharField(max_length=250, unique=True)
     created_by = CharField(default=User.username)
     assigned_by = CharField(default=User.username)
-    math_op = CharField(default="+")
+    math_op = CharField(default='+')
     starting_num = IntegerField(default=0)
     ending_num = IntegerField(default=10)
     allow_neg_answers = BooleanField(default=False)
@@ -68,9 +68,9 @@ class SavedQuizzes(BaseModel):
     def create_facts(self):
         facts = {}
         first_num = 0
-        math_operators = {"+": operator.add,
-                          "-": operator.sub,
-                          "*": operator.mul,
+        math_operators = {'+': operator.add,
+                          '-': operator.sub,
+                          '*': operator.mul,
                           }
 
         def in_dict(k, v, dictionary):
@@ -83,15 +83,15 @@ class SavedQuizzes(BaseModel):
 
         while first_num <= self.ending_num:
             for i in range(self.starting_num, self.ending_num+1):
-                key1 = "{} {} {}".format(first_num, self.math_op, i)
+                key1 = '{} {} {}'.format(first_num, self.math_op, i)
                 value1 = math_operators[self.math_op](first_num, i)
                 in_dict(key1, value1, facts)
 
                 if first_num != i:
-                    key2 = "{} {} {}".format(i, self.math_op, first_num)
+                    key2 = '{} {} {}'.format(i, self.math_op, first_num)
                     value2 = math_operators[self.math_op](i, first_num)
                     in_dict(key2, value2, facts)
-                    key3 = "{} {} {}".format(i, self.math_op, i)
+                    key3 = '{} {} {}'.format(i, self.math_op, i)
                     value3 = math_operators[self.math_op](i, i)
                     in_dict(key3, value3, facts)
 
@@ -109,14 +109,10 @@ class SavedQuizzes(BaseModel):
         return test_questions
 
 
-# Keep track of user scores on saved quizzes
-# Be able to show score for a specific day
-# Be able to show overall trend
-# Should allow for graphs/information about what type of questions (+, -, *) are stronger, weaker, etc.
 class UserScores(BaseModel):
     user_id = ForeignKeyField(User, unique=False)
     quiz_id = ForeignKeyField(SavedQuizzes, null=True, unique=False)
-    quiz_type = CharField(default="+")
+    quiz_type = CharField(default='+')
     questions_correct = IntegerField(default=0)
     questions_wrong = IntegerField(default=0)
     questions_total = IntegerField(default=0)
@@ -124,9 +120,9 @@ class UserScores(BaseModel):
 
 
 class Questions(BaseModel):
-    question = CharField()
+    question = CharField(unique=True)
     answer = IntegerField()
-    question_type = CharField(default="Equation")
+    question_type = CharField(default='Equation')
     question_op = CharField()
 
     @classmethod
@@ -138,16 +134,15 @@ class Questions(BaseModel):
         first = start_num
         while first <= end_num:
             for i in range(start_num, end_num+1):
-                qstn_text = "{} {} {}".format(first, qstn_op, i)
+                qstn_text = '{} {} {}'.format(first, qstn_op, i)
                 ans = operators[qstn_op](first, i)
                 with DATABASE.transaction():
                     cls.create(
                         question=qstn_text,
                         answer=ans,
-                        question_type="Equation",
+                        question_type='Equation',
                         question_op=qstn_op
                     )
-
             first += 1
 
     @classmethod
@@ -158,16 +153,15 @@ class Questions(BaseModel):
         operators = {'+': operator.add, '-': operator.sub, '*': operator.mul}
         for i in range(101):
             for j in range(101):
-                qstn_text = "{} {} {}".format(i, qstn_op, j)
+                qstn_text = '{} {} {}'.format(i, qstn_op, j)
                 ans = operators[qstn_op](i, j)
                 with DATABASE.transaction():
                     cls.create(
                         question=qstn_text,
                         answer=ans,
-                        question_type="Equation",
+                        question_type='Equation',
                         question_op=qstn_op
                     )
-
 
 
 def initialize():

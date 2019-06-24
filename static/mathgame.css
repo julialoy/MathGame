@@ -106,11 +106,11 @@ body {
   margin-top: 5rem;
 }
 
-/* FLASH MESSAGES*/
+/* FLASH MESSAGES */
 
-/* #messages {
-  margin-top: 3.5rem;
-} */
+#messages {
+  margin-top: 4rem;
+}
 
 /* PROFILE */
 
@@ -170,6 +170,16 @@ body {
 /* ADMIN VIEW */
 #admin-page-title {
   margin-top: 3rem;
+}
+
+#database-form {
+  margin-top: 5rem;
+}
+
+.populate-questions {
+  padding: 2rem;
+  background-color: lightgrey;
+  border-radius: 25px;
 }
 
 /* MEDIA QUERIES */
