@@ -52,10 +52,10 @@ class User(UserMixin, BaseModel):
 
 
 class Quizzes(BaseModel):
-    user = ForeignKeyField(User, unique=False)
+    # user = ForeignKeyField(User, unique=False)
     quiz_name = CharField(max_length=250, unique=True)
-    created_by = CharField(default=User.username)
-    assigned_by = CharField(default=User.username)
+    # created_by = CharField(default=User.username)
+    # assigned_by = CharField(default=User.username)
     math_op = CharField(default='+')
     starting_num = IntegerField(default=0)
     ending_num = IntegerField(default=10)
@@ -108,12 +108,20 @@ class Quizzes(BaseModel):
 
 class QuizAttempts(BaseModel):
     user_id = ForeignKeyField(User, unique=False)
+    # Assigned_by added
+    assigned_by = ForeignKeyField(User, default=None, null=False, unique=False)
     quiz_id = ForeignKeyField(Quizzes, unique=False)
     quiz_type = CharField(default='+', null=False)
     questions_correct = IntegerField(default=0)
     questions_wrong = IntegerField(default=0)
     questions_total = IntegerField(default=0)
     date_taken = DateTimeField(default=datetime.datetime.now())
+
+
+class UserQuizzes(BaseModel):
+    """Joined table for quizzes created by and saved by users."""
+    user_id = ForeignKeyField(User, unique=False)
+    quiz_id = ForeignKeyField(Quizzes, unique=True)
 
 
 class Questions(BaseModel):
@@ -178,5 +186,5 @@ class QuestionAttempts(BaseModel):
 
 def initialize():
     DATABASE.connect()
-    DATABASE.create_tables([User, Quizzes, QuizAttempts, Questions, QuestionAttempts], safe=True)
+    DATABASE.create_tables([User, Quizzes, QuizAttempts, UserQuizzes, Questions, QuestionAttempts], safe=True)
     DATABASE.close()
