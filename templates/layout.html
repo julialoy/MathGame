@@ -10,61 +10,67 @@
 
 <body>
 <header>
-    <!-- <div class="container d-flex justify-content-center">
-        <h1 class="text-info py-5">Math Quiz!</h1>
-    </div>
-    -->
+    {% if current_user.is_authenticated and not current_user.is_admin %}
+        <div class="container-fluid" id="navbar">
+            <nav class="navbar fixed-top navbar-dark bg-info">
+              <a class="navbar-brand" href="{{ url_for('index') }}">Math Game!</a>
+                <ul class="navbar-nav mr-auto mt-2 mt-lg-0 d-inline-flex flex-row">
+                    <li class="nav-item">
+                        <a class="nav-item nav-link" href="{{ url_for('profile') }}">
+                            Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-item nav-link" href="{{ url_for('startquickquiz') }}">
+                        Start Quick Quiz
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-item nav-link" href="{{ url_for('startcustomquiz') }}">
+                            Start Custom Quiz
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-item nav-link" href="{{ url_for('logout') }}">
+                        Sign Out
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    {% elif current_user.is_authenticated and current_user.is_admin %}
+        <div class="container-fluid" id="navbar">
+            <nav class="navbar fixed-top navbar-dark bg-info">
+              <a class="navbar-brand" href="{{ url_for('index') }}">Math Game!</a>
+                <ul class="navbar-nav mr-auto mt-2 mt-lg-0 d-inline-flex flex-row">
+                    <li class="nav-item">
+                        <a class="nav-item nav-link" href="{{ url_for('logout') }}">
+                            Sign Out
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
 </header>
 
 <main role="main" class="container">
-<div id="messages">
-    {% with messages=get_flashed_messages() %}
-        {% if messages %}
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                {% for message in messages %}
-                    <div class="col-sm" id="flash-message">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        {% endif %}
-    {% endwith %}
-</div>
-{% if current_user.is_authenticated and not current_user.is_admin %}
-<div class="container-fluid" id="navbar">
-    <nav class="navbar fixed-top navbar-dark bg-info">
-      <a class="navbar-brand" href="{{ url_for('index') }}">Math Game!</a>
-            <ul class="navbar-nav mr-auto mt-2 mt-lg-0 d-inline-flex flex-row">
-                <li class="nav-item"><a class="nav-item nav-link" href="{{ url_for('profile') }}">Profile</a></li>
-                <li class="nav-item"><a class="nav-item nav-link" href="{{ url_for('startquickquiz') }}">
-                    Start Quick Quiz
-                </a></li>
-                <li class="nav-item"><a class="nav-item nav-link" href="{{ url_for('startcustomquiz') }}">
-                    Start Custom Quiz
-                </a></li>
-                <li class="nav-item"><a class="nav-item nav-link" href="{{ url_for('logout') }}">
-                    Sign Out
-                </a></li>
-            </ul>
-            </nav>
-</div>
-{% elif current_user.is_authenticated and current_user.is_admin %}
-<div class="container-fluid" id="navbar">
-    <nav class="navbar fixed-top navbar-dark bg-info">
-      <a class="navbar-brand" href="{{ url_for('index') }}">Math Game!</a>
-            <ul class="navbar-nav mr-auto mt-2 mt-lg-0 d-inline-flex flex-row">
-                <li class="nav-item">
-                    <a class="nav-item nav-link" href="{{ url_for('logout') }}">
-                        Sign Out
-                    </a>
-                </li>
-            </ul>
-        {% endif %}
-    </nav>
-</div>
+    <div id="messages">
+        {% with messages=get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {% for message in messages %}
+                        <div class="col-sm" id="flash-message">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
     {% block content %} {% endblock %}
 </main>
 
