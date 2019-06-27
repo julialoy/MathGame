@@ -4,17 +4,19 @@
 <div class="row main-row fill" id="main-profile">
     <div class="container d-flex-col col-8 align-self-start justify-content-center py-4" id="profile-container">
         <div class="h5 text-center col-sm" id="profile-heading">
-            <img src="{{ url_for('upload_file', filename=selected_user.pic) }}" class="rounded-circle" id="profile-pic">
+            <div class="rounded-circle" id="profile-pic-container">
+                <img src="{{ url_for('upload_file', filename=selected_user.pic) }}" class="align-self-center rounded-circle" id="profile-pic">
+            </div>
             {{ current_user.username }}'s Profile
         </div>
         <div class="row" id="quiz-list">
             Saved Quizzes:
             <ul>
-            {% for quiz in quiz_list %}
-                <li><a href="{{ url_for('startsavedquiz', saved_quiz_id=quiz.id) }}">
-                    {{ quiz.quiz_name }}
-                </a></li>
-            {% endfor %}
+                {% for quiz in quiz_list %}
+                    <li><a href="{{ url_for('startsavedquiz', saved_quiz_id=quiz.id) }}">
+                        {{ quiz.quiz_name }}
+                    </a></li>
+                {% endfor %}
             </ul>
         </div>
     </div>

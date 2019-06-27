@@ -179,8 +179,8 @@ def index():
         return redirect(url_for('admin'))
     else:
         selected_user = models.User.get(models.User.id == current_user.id)
-        quiz_list = (models.SavedQuizzes.select()
-                     .join(models.User, on=(models.SavedQuizzes.user_id == models.User.id))
+        quiz_list = (models.Quizzes.select()
+                     .join(models.User, on=(models.Quizzes.user_id == models.User.id))
                      .where(models.User.id == current_user.id))
         return render_template('index.html',
                                selected_user=selected_user,
@@ -192,8 +192,8 @@ def index():
 @login_required
 def profile():
     selected_user = models.User.get(models.User.id == current_user.id)
-    quiz_list = (models.SavedQuizzes.select()
-                 .join(models.User, on=(models.SavedQuizzes.user_id == models.User.id))
+    quiz_list = (models.Quizzes.select()
+                 .join(models.User, on=(models.Quizzes.user_id == models.User.id))
                  .where(models.User.id == current_user.id))
     total_quizzes = (models.QuizAttempts.select()
                      .join(models.User, on=(models.QuizAttempts.user_id == models.User.id))
@@ -265,7 +265,7 @@ def startquickquiz():
                                                   questions_total=10,
                                                   date_take=datetime.now()
                                                   )
-    session['current_quiz_id'] = 0
+    session['current_quiz_id'] = None
     session['current_facts'] = 10
     session['current_quiz'] = '+'
     session['current_qstn_type'] = 'Equation'
@@ -300,7 +300,7 @@ def startcustomquiz():
         else:
             quiz_end = 10
 
-        new_cust_quiz = models.SavedQuizzes(user=current_user.id,
+        new_cust_quiz = models.Quizzes(user=current_user.id,
                                             quiz_name=quiz_desc,
                                             created_by=current_user.username,
                                             assigned_by=current_user.username,
@@ -345,7 +345,7 @@ def startcustomquiz():
 def startsavedquiz(saved_quiz_id):
     # Currently this does not allow you to retake the exact same questions
     # Need to fix question view to do that
-    base = models.SavedQuizzes.get(models.SavedQuizzes.id == saved_quiz_id)
+    base = models.Quizzes.get(models.Quizzes.id == saved_quiz_id)
     current_user_score = models.QuizAttempts.create(user_id=current_user.id,
                                                   quiz_id=saved_quiz_id,
                                                   quiz_type=base.math_op,

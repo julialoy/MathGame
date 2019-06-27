@@ -51,7 +51,7 @@ class User(UserMixin, BaseModel):
         return False
 
 
-class SavedQuizzes(BaseModel):
+class Quizzes(BaseModel):
     user = ForeignKeyField(User, unique=False)
     quiz_name = CharField(max_length=250, unique=True)
     created_by = CharField(default=User.username)
@@ -108,8 +108,8 @@ class SavedQuizzes(BaseModel):
 
 class QuizAttempts(BaseModel):
     user_id = ForeignKeyField(User, unique=False)
-    quiz_id = ForeignKeyField(SavedQuizzes, null=True, unique=False)
-    quiz_type = CharField(default='+')
+    quiz_id = ForeignKeyField(Quizzes, unique=False)
+    quiz_type = CharField(default='+', null=False)
     questions_correct = IntegerField(default=0)
     questions_wrong = IntegerField(default=0)
     questions_total = IntegerField(default=0)
@@ -170,7 +170,7 @@ class Questions(BaseModel):
 class QuestionAttempts(BaseModel):
     user_id = ForeignKeyField(User, unique=False)
     question_id = ForeignKeyField(Questions, unique=False)
-    quiz_id = ForeignKeyField(SavedQuizzes, null=True, unique=False)
+    quiz_id = ForeignKeyField(Quizzes, null=False, unique=False)
     correct = BooleanField()
     incorrect = BooleanField()
     date_attempted = DateTimeField(default=datetime.datetime.now())
@@ -178,5 +178,5 @@ class QuestionAttempts(BaseModel):
 
 def initialize():
     DATABASE.connect()
-    DATABASE.create_tables([User, SavedQuizzes, QuizAttempts, Questions, QuestionAttempts], safe=True)
+    DATABASE.create_tables([User, Quizzes, QuizAttempts, Questions, QuestionAttempts], safe=True)
     DATABASE.close()

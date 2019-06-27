@@ -95,7 +95,7 @@ body {
 .nav-item {
   padding-left: 1.5rem;
   padding-right: 1.5rem;
-  padding-bottom: .25rem;
+  padding-bottom: 0.25rem;
 }
 
 .nav-item:hover {
@@ -128,14 +128,18 @@ body {
   margin-top: 5em;
 }
 
+#profile-pic-container {
+    position: relative;
+    width: 75px;
+    height: 75px;
+    border: 0.25rem solid #17a2b8;
+    top: -40px;
+    left: -50px;
+}
+
 #profile-pic {
-  display: inline-block;
-  position: relative;
-  border: 0.25rem solid #17a2b8;
-  max-width: 10%;
-  height: auto;
-  top: -40px;
-  left: -280px;
+  max-width: 100%;
+  height: 100%;
   cursor: pointer;
 }
 
