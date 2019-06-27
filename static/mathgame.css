@@ -88,10 +88,18 @@ body {
 
 /* NAVIGATION BAR */
 
+.navbar-brand:hover {
+  transform: scale(1.1);
+}
+
 .nav-item {
   padding-left: 1.5rem;
   padding-right: 1.5rem;
   padding-bottom: .25rem;
+}
+
+.nav-item:hover {
+  transform: scale(1.1);
 }
 
 /* MAIN CONTAINER */

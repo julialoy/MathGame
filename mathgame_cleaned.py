@@ -40,6 +40,19 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def get_question(operation, qstn_type, num_start, num_end):
+    q = (models.Questions.select()
+         .where(models.Questions.question_op == operation,
+                models.Questions.question_type == qstn_type,
+                models.Questions.first_num >= num_start,
+                models.Questions.first_num <= num_end,
+                models.Questions.second_num >= num_start,
+                models.Questions.second_num <= num_end)
+         .order_by(fn.Random()).limit(1)
+         )
+    return q
+
+
 @login_manager.user_loader
 def load_user(user_id):
     """Tries to load the user from the database using the user id.
@@ -140,9 +153,13 @@ def login():
 def logout():
     """Logs a user out and removes information from the current session."""
     session.pop('username', None)
+    session.pop('current_quiz_id', None)
     session.pop('current_quiz', None)
     session.pop('current_facts', None)
+    session.pop('current_qstn_type', None)
+    session.pop('current_end_start', None)
     session.pop('current_quiz_desc', None)
+    session.pop('previous_questions', None)
     session.pop('current_num_correct', None)
     session.pop('current_num_incorrect', None)
     session.pop('current_user_score', None)
@@ -178,8 +195,8 @@ def profile():
     quiz_list = (models.SavedQuizzes.select()
                  .join(models.User, on=(models.SavedQuizzes.user_id == models.User.id))
                  .where(models.User.id == current_user.id))
-    total_quizzes = (models.UserScores.select()
-                     .join(models.User, on=(models.UserScores.user_id == models.User.id))
+    total_quizzes = (models.QuizAttempts.select()
+                     .join(models.User, on=(models.QuizAttempts.user_id == models.User.id))
                      .where(models.User.id == current_user.id))
     quiz_types = [quiz.quiz_type for quiz in total_quizzes]
 
@@ -238,17 +255,9 @@ def startquickquiz():
     """Starts a quiz with 10 random addition facts using numbers from 0 to 10 and adds the quiz to the current
     session for the current user.
     """
-    new_test = models.SavedQuizzes(user=current_user.id,
-                                   quiz_name='Basic Addition Math Facts from 0 to 10',
-                                   created_by=current_user.id,
-                                   assigned_by=None,
-                                   math_op="+",
-                                   starting_num=0,
-                                   ending_num=10,
-                                   allow_neg_answers=False,
-                                   quiz_length=10
-                                   )
-    current_user_score = models.UserScores.create(user_id=current_user.id,
+    # Quick quizzes and unsaved custom quizzes still need to generate a unique quiz id ?
+    # This will allow all quizzes to be recreated, effectively saving a quiz that a user doesn't want to save?
+    current_user_score = models.QuizAttempts.create(user_id=current_user.id,
                                                   quiz_id=0,
                                                   quiz_type="+",
                                                   questions_crrect=0,
@@ -256,11 +265,13 @@ def startquickquiz():
                                                   questions_total=10,
                                                   date_take=datetime.now()
                                                   )
-    facts = new_test.create_facts()
-    quiz = new_test.create_test(facts)
-    session['current_quiz'] = quiz
-    session['current_facts'] = facts
+    session['current_quiz_id'] = 0
+    session['current_facts'] = 10
+    session['current_quiz'] = '+'
+    session['current_qstn_type'] = 'Equation'
+    session['current_end_start'] = [0, 10]
     session['current_quiz_desc'] = 'Basic Addition Math Facts from 0 to 10'
+    session['previous_questions'] = []
     session['current_num_correct'] = 0
     session['current_num_incorrect'] = 0
     session['current_user_score'] = current_user_score.id
@@ -306,7 +317,7 @@ def startcustomquiz():
         else:
             cust_id = 0
 
-        current_user_score = models.UserScores.create(user_id=current_user.id,
+        current_user_score = models.QuizAttempts.create(user_id=current_user.id,
                                                       quiz_id=cust_id,
                                                       quiz_type=quiz_op,
                                                       questions_correct=0,
@@ -314,12 +325,13 @@ def startcustomquiz():
                                                       questions_total=quiz_length,
                                                       date_taken=datetime.now()
                                                       )
-        cust_facts = new_cust_quiz.create_facts()
-        cust_quiz = new_cust_quiz.create_test(cust_facts)
-        cust_desc = new_cust_quiz.quiz_name
-        session['current_facts'] = cust_facts
-        session['current_quiz'] = cust_quiz
-        session['current_quiz_desc'] = cust_desc
+        session['current_quiz_id'] = cust_id
+        session['current_facts'] = quiz_length
+        session['current_quiz'] = quiz_op
+        session['current_qstn_type'] = 'Equation'
+        session['current_end_start'] = [quiz_start, quiz_end]
+        session['current_quiz_desc'] = quiz_desc
+        session['previous_questions'] = []
         session['current_num_correct'] = 0
         session['current_num_incorrect'] = 0
         session['current_user_score'] = current_user_score.id
@@ -331,10 +343,10 @@ def startcustomquiz():
 @app.route('/startsavedquiz/<saved_quiz_id>', methods=['GET', 'POST'])
 @login_required
 def startsavedquiz(saved_quiz_id):
+    # Currently this does not allow you to retake the exact same questions
+    # Need to fix question view to do that
     base = models.SavedQuizzes.get(models.SavedQuizzes.id == saved_quiz_id)
-    facts = base.create_facts()
-    quiz = base.create_test(facts)
-    current_user_score = models.UserScores.create(user_id=current_user.id,
+    current_user_score = models.QuizAttempts.create(user_id=current_user.id,
                                                   quiz_id=saved_quiz_id,
                                                   quiz_type=base.math_op,
                                                   questions_correct=0,
@@ -342,9 +354,13 @@ def startsavedquiz(saved_quiz_id):
                                                   questions_total=base.quiz_length,
                                                   date_taken=datetime.now()
                                                   )
-    session['current_facts'] = facts
-    session['current_quiz'] = quiz
+    session['current_quiz_id'] = base.id
+    session['current_facts'] = base.quiz_length
+    session['current_quiz'] = base.math_op
+    session['current_qstn_type'] = 'Equation'
+    session['current_end_start'] = [base.starting_num, base.ending_num]
     session['current_quiz_desc'] = base.quiz_name
+    session['previous_questions'] = []
     session['current_num_correct'] = 0
     session['current_num_incorrect'] = 0
     session['current_user_score'] = current_user_score.id
@@ -355,14 +371,31 @@ def startsavedquiz(saved_quiz_id):
 @login_required
 def question():
     try:
-        len(session['current_quiz'])
+        session['current_facts']
     except KeyError:
         return jsonify(question="You haven't started a quiz!")
     else:
-        if len(session['current_quiz']) >= 1:
-            new_question = session['current_quiz'].pop()
-            session['current_quiz'] = session['current_quiz']
-            return jsonify(question=new_question)
+        if session['current_facts'] > 0:
+            problem = get_question(session['current_quiz'], session['current_qstn_type'],
+                                   session['current_end_start'][0], session['current_end_start'][1])
+
+            if problem[0].id in session['previous_questions']:
+                # Delete after more testing
+                print("NEED NEW PROBLEM: {}".format(problem[0].id))
+                problem = get_question(session['current_quiz'], session['current_qstn_type'],
+                                       session['current_end_start'][0], session['current_end_start'][1])
+
+            session['current_question'] = problem[0].id
+            # Delete after more testing
+            print("CURRENT QUESTION ID: {}".format(problem[0].id))
+            session['previous_questions'].append(problem[0].id)
+            # Delete after more testing
+            print("PREV QSTS: {}".format(session['previous_questions']))
+            qst = problem[0].question
+            session['current_facts'] -= 1
+            # Delete after more testing
+            print("CURRENT FACTS: {}".format(session['current_facts']))
+            return jsonify(question=qst)
         else:
             current_correct = session['current_num_correct']
             current_incorrect = session['current_num_incorrect']
@@ -376,24 +409,38 @@ def question():
 @login_required
 def checkanswer():
     data = request.form
-    qstn = data['question']
     try:
         user_answer = int(data['userAnswer'])
     except ValueError:
         return jsonify(answer='Try again! Please enter a number.')
     else:
-        if user_answer == session['current_facts'][qstn]:
-            q = (models.UserScores
-                 .update({models.UserScores.questions_correct: models.UserScores.questions_correct + 1})
-                 .where(models.UserScores.id == session['current_user_score']))
-            q.execute()
+        correct_answer = models.Questions.get(models.Questions.id == session['current_question']).answer
+        if user_answer == correct_answer:
+            q_c1 = (models.QuizAttempts
+                    .update({models.QuizAttempts.questions_correct: models.QuizAttempts.questions_correct + 1})
+                    .where(models.QuizAttempts.id == session['current_user_score']))
+            q_c1.execute()
+            models.QuestionAttempts.create(user_id=current_user.id,
+                                           question_id=session['current_question'],
+                                           quiz_id=session['current_quiz_id'],
+                                           correct=True,
+                                           incorrect=False,
+                                           date_attempted=datetime.now()
+                                           )
             session['current_num_correct'] += 1
             return jsonify(answer='CORRECT!')
         else:
-            q = (models.UserScores
-                 .update({models.UserScores.questions_wrong: models.UserScores.questions_wrong + 1})
-                 .where(models.UserScores.id == session['current_user_score']))
-            q.execute()
+            q_w1 = (models.QuizAttempts
+                    .update({models.QuizAttempts.questions_wrong: models.QuizAttempts.questions_wrong + 1})
+                    .where(models.QuizAttempts.id == session['current_user_score']))
+            q_w1.execute()
+            models.QuestionAttempts.create(user_id=current_user.id,
+                                           question_id=session['current_question'],
+                                           quiz_id=session['current_quiz_id'],
+                                           correct=False,
+                                           incorrect=True,
+                                           date_attempted=datetime.now()
+                                           )
             session['current_num_incorrect'] += 1
             return jsonify(answer="Sorry! That's not the right answer.")
 
