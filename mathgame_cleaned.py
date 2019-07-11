@@ -194,9 +194,6 @@ def index():
 @login_required
 def profile():
     selected_user = models.User.get(models.User.id == current_user.id)
-    # quiz_list = (models.Quizzes.select()
-    #              .join(models.User, on=(models.Quizzes.user_id == models.User.id))
-    #              .where(models.User.id == current_user.id))
     quiz_list = (models.UserQuizzes.select()
                  .where(models.UserQuizzes.user_id == current_user.id))
     total_quizzes = (models.QuizAttempts.select()

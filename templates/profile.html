@@ -10,14 +10,21 @@
             {{ current_user.username }}'s Profile
         </div>
         <div class="row" id="quiz-list">
-            Saved Quizzes:
-            <ul>
-                {% for quiz in quiz_list %}
-                    <li><a href="{{ url_for('startsavedquiz', saved_quiz_id=quiz.id) }}">
-                        {{ quiz.quiz_name }}
-                    </a></li>
-                {% endfor %}
-            </ul>
+                {% if quiz_list|length != 0 %}
+                    Saved Quizzes:
+                    <ul>
+                    {% for quiz in quiz_list %}
+                        <li><a href="{{ url_for('startsavedquiz', saved_quiz_id=quiz.id) }}">
+                            {{ quiz.quiz_name }}
+                        </a></li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="align-self-center">
+                        You don't have any saved quizzes!
+                        <a href="{{ url_for('startcustomquiz') }}">Create a quiz here.</a>
+                    </p>
+                {% endif %}
         </div>
     </div>
 </div>
