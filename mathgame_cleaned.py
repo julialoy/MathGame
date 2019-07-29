@@ -179,11 +179,9 @@ def index():
         return redirect(url_for('admin'))
     else:
         selected_user = models.User.get(models.User.id == current_user.id)
-        # quiz_list = (models.Quizzes.select()
-        #              .join(models.User, on=(models.Quizzes.user_id == models.User.id))
-        #              .where(models.User.id == current_user.id))
-        quiz_list = (models.UserQuizzes.select()
-                     .where(models.UserQuizzes.user_id == current_user.id))
+        user_quizzes = (models.UserQuizzes.select()
+                        .where(models.UserQuizzes.user_id == current_user.id))
+        quiz_list = user_quizzes[:5]
         return render_template('index.html',
                                selected_user=selected_user,
                                quiz_list=quiz_list
@@ -301,8 +299,7 @@ def startcustomquiz():
         else:
             quiz_end = 10
 
-        new_cust_quiz = models.Quizzes(quiz_name=quiz_desc,
-                                       math_op=quiz_op,
+        new_cust_quiz = models.Quizzes(math_op=quiz_op,
                                        starting_num=quiz_start,
                                        ending_num=quiz_end,
                                        allow_neg_answers=False,
@@ -312,6 +309,7 @@ def startcustomquiz():
 
         if quiz_setup['save-quiz'] == 'yes':
             models.UserQuizzes.create(user_id=current_user.id,
+                                      quiz_name=quiz_desc,
                                       quiz_id=new_cust_quiz.id
                                       )
 

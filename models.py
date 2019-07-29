@@ -52,7 +52,7 @@ class User(UserMixin, BaseModel):
 
 
 class Quizzes(BaseModel):
-    quiz_name = CharField(max_length=250, unique=True)
+    # quiz_name = CharField(max_length=250, unique=True)
     math_op = CharField(default='+')
     starting_num = IntegerField(default=0)
     ending_num = IntegerField(default=10)
@@ -62,7 +62,7 @@ class Quizzes(BaseModel):
 
 class QuizAttempts(BaseModel):
     user_id = ForeignKeyField(User, unique=False)
-    assigned_by = ForeignKeyField(User, default=None, null=False, unique=False)
+    assigned_by = ForeignKeyField(User, default=None, null=True, unique=False)
     quiz_id = ForeignKeyField(Quizzes, unique=False)
     quiz_type = CharField(default='+', null=False)
     questions_correct = IntegerField(default=0)
@@ -72,9 +72,17 @@ class QuizAttempts(BaseModel):
 
 
 class UserQuizzes(BaseModel):
-    """Joined table for quizzes created by and saved by users."""
+    """Table for quizzes created by and saved by users."""
     user_id = ForeignKeyField(User, unique=False)
+    quiz_name = CharField(max_length=250)
     quiz_id = ForeignKeyField(Quizzes, unique=True)
+
+    class Meta:
+        indexes = (
+            # Ensure quiz_name is unique within one user's quizzes.
+            # Different users may have quizzes with the same name.
+            (('user_id', 'quiz_name'), True),
+        )
 
 
 class Questions(BaseModel):
