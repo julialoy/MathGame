@@ -53,6 +53,7 @@ const fillTenframe = (numbers, qst) => {
       }
   } else {
     $('#show-tenframe').hide();
+    $('#answer-tenframe').hide();
   }
 };
 
@@ -87,11 +88,13 @@ const nextQuestion = () => {
       $('#user-answer').hide();
       $('#submit-answer-button').hide();
       $('#show-tenframe').hide();
+      $('#answer-tenframe').hide();
     } else if (data.question === "End of Quiz!") {
       $('#quiz-question').append(`<h3>${data.question}</h3>`)
       $('#user-answer').hide();
       $('#submit-answer-button').hide();
       $('#show-tenframe').hide();
+      $('#answer-tenframe').hide();
       $('#quiz-question').append(`<p>You answered ${data.current_correct} questions correctly!</p>`);
       $('#quiz-question').append(`<p>You answered ${data.current_incorrect} questions incorrectly.</p>`);
     } else {
@@ -99,8 +102,10 @@ const nextQuestion = () => {
       const quizNumbers = splitOnOperator($.trim($('#quiz-question').text()).split(" = ")[0]);
       if (useTenframes(quizNumbers, data.question) === true) {
         $('#show-tenframe').show();
+        $('#answer-tenframe').show();
       } else {
         $('#show-tenframe').hide();
+        $('#answer-tenframe').hide();
       }
     };
   });
@@ -122,12 +127,14 @@ $.ajax({url:"/question", dataType:"json"}).then( data => {
     $('#user-answer').hide();
     $('#submit-answer-button').hide();
     $('#show-tenframe').hide();
+    $('#answer-tenframe').hide();
   } else {
     $('#quiz-question').append(`<h3>${data.question} = ?</h3>`);
     $('#get-next-btn').hide();
     const quizNumbers = splitOnOperator($.trim($('#quiz-question').text()).split(" = ")[0]);
     if (useTenframes(quizNumbers, data.question) === false) {
       $('#show-tenframe').hide();
+      $('#answer-tenframe').hide();
     }
   }
 });

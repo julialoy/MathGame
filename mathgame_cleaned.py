@@ -343,8 +343,10 @@ def startcustomquiz():
 def startsavedquiz(saved_quiz_id):
     # Currently this does not allow you to retake the exact same questions
     # Need to fix question view to do that
+    basic_info = models.UserQuizzes.get(models.UserQuizzes.id == saved_quiz_id)
     base = models.Quizzes.get(models.Quizzes.id == saved_quiz_id)
-    current_user_score = models.QuizAttempts.create(quiz_id=saved_quiz_id,
+    current_user_score = models.QuizAttempts.create(user_id=current_user.id,
+                                                    quiz_id=saved_quiz_id,
                                                     quiz_type=base.math_op,
                                                     questions_correct=0,
                                                     questions_wrong=0,
@@ -356,7 +358,7 @@ def startsavedquiz(saved_quiz_id):
     session['current_quiz'] = base.math_op
     session['current_qstn_type'] = 'Equation'
     session['current_end_start'] = [base.starting_num, base.ending_num]
-    session['current_quiz_desc'] = base.quiz_name
+    session['current_quiz_desc'] = basic_info.quiz_name
     session['previous_questions'] = []
     session['current_num_correct'] = 0
     session['current_num_incorrect'] = 0
