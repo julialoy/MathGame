@@ -37,6 +37,8 @@ const useTenframes = (numbers, qst) => {
 //Fill two ten frames per the current quiz question
 const fillTenframe = (numbers, qst) => {
   if (useTenframes(numbers, qst) === true) {
+      const numOneText = document.getElementById('num-one');
+      const numTwoText = document.getElementById('num-two');
       const tableOne = document.getElementById('tenframe-table-one');
       const tableTwo = document.getElementById('tenframe-table-two');
       const tableOneCells = tableOne.getElementsByTagName("td");
@@ -46,11 +48,13 @@ const fillTenframe = (numbers, qst) => {
         const redSphereOne = tableOneCells[i].firstChild;
         redSphereOne.setAttribute("style", "background-color:#17a2b8");
       }
+      numOneText.append(numbers[0]);
 
       for (i = 0; i <parseInt(numbers[1]); i++) {
         const redSphereTwo = tableTwoCells[i].firstChild;
         redSphereTwo.setAttribute("style", "background-color:#17a2b8");
       }
+      numTwoText.append(numbers[1]);
   } else {
     $('#show-tenframe').hide();
     $('#answer-tenframe').hide();
@@ -63,12 +67,16 @@ const emptyTenframe = () => {
   const tableTwo = document.getElementById('tenframe-table-two');
   const tableOneCells = tableOne.getElementsByTagName("td");
   const tableTwoCells = tableTwo.getElementsByTagName("td");
+  const numOneText = document.getElementById('num-one');
+  const numTwoText = document.getElementById('num-two');
   for (i = 0; i < 10; i++) {
     const redSphereOne = tableOneCells[i].firstChild;
     const redSphereTwo = tableTwoCells[i].firstChild;
     redSphereOne.setAttribute("style", "background-color:#212529");
     redSphereTwo.setAttribute("style", "background-color:#212529");
   }
+  numOneText.append('');
+  numTwoText.append('');
 };
 
 //Get the next quiz question
@@ -203,6 +211,7 @@ $('#user-answer').submit( evt => {
       $('#submit-answer-button').hide();
       $('#user-answer-text').val("");
       $('#tenframes').prop('hidden', true);
+      $('#answer-tenframe').hide();
       setTimeout(nextQuestion, 2000);
     } else if (data.answer === "Sorry! That's not the right answer.") {
       $('#game-container').css("background-color", "indianred");
@@ -213,6 +222,7 @@ $('#user-answer').submit( evt => {
       $('#submit-answer-button').hide();
       $('#user-answer-text').val("");
       $('#tenframes').prop('hidden', true);
+      $('#answer-tenframe').hide();
       setTimeout(nextQuestion, 2000);
     }
   });

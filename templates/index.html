@@ -18,26 +18,32 @@
         <button type="button" name="answer-tenframe" id="answer-tenframe" class="btn btn-dark">Answer in a Ten Frame</button>
 
     <div class="container" id="tenframes" hidden>
-
-        <table class="table table-bordered table-dark" id="tenframe-table-one">
-            <tbody>
-            <tr>
-                <td><p class="sphere"></p></td>
-                <td><p class="sphere"></p></td>
-                <td><p class="sphere"></p></td>
-                <td><p class="sphere"></p></td>
-                <td><p class="sphere"></p></td>
-            </tr>
-            <tr>
-                <td><p class="sphere"></p></td>
-                <td><p class="sphere"></p></td>
-                <td><p class="sphere"></p></td>
-                <td><p class="sphere"></p></td>
-                <td><p class="sphere"></p></td>
-            </tr>
-            </tbody>
-        </table>
-
+        <div class="row">
+        <div class="col-2 h3 d-flex justify-content-center align-items-center" id="num-one"></div>
+        <div class="col-10" id="table-one-container">
+            <table class="table table-bordered table-dark" id="tenframe-table-one">
+                <tbody>
+                <tr>
+                    <td><p class="sphere"></p></td>
+                    <td><p class="sphere"></p></td>
+                    <td><p class="sphere"></p></td>
+                    <td><p class="sphere"></p></td>
+                    <td><p class="sphere"></p></td>
+                </tr>
+                <tr>
+                    <td><p class="sphere"></p></td>
+                    <td><p class="sphere"></p></td>
+                    <td><p class="sphere"></p></td>
+                    <td><p class="sphere"></p></td>
+                    <td><p class="sphere"></p></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        </div>
+        <div class="row">
+        <div class="col-2 h3 d-flex justify-content-center align-items-center" id="num-two"></div>
+            <div class="col-10" id="table-two-container">
         <table class="table table-bordered table-dark" id="tenframe-table-two">
             <tbody>
             <tr>
@@ -56,6 +62,8 @@
             </tr>
             </tbody>
         </table>
+            </div>
+        </div>
     </div>
     </div>
     <div class="container d-flex-col col-3 align-self-stretch" id="sidebar">

@@ -172,6 +172,16 @@ body {
   border-radius: 25px;
 }
 
+/* TEN FRAMES */
+
+#num-one, #num-two {
+  color: #17a2b8;
+}
+
+.sphere:hover {
+  transform: scale(1.1);
+}
+
 /* WELCOME MESSAGE */
 
 #welcome-message {
