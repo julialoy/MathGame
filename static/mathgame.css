@@ -13,11 +13,6 @@ body {
 body {
   display: -ms-flexbox;
   display: flex;
-  /*-ms-flex-align: center;
-  align-items: center;
-  min-height: 75rem;
-  padding-top: 40px;
-  padding-bottom: 40px;*/
   background-color: #f5f5f5;
 }
 
@@ -93,10 +88,18 @@ body {
 
 /* NAVIGATION BAR */
 
+.navbar-brand:hover {
+  transform: scale(1.1);
+}
+
 .nav-item {
   padding-left: 1.5rem;
   padding-right: 1.5rem;
-  padding-bottom: .25rem;
+  padding-bottom: 0.25rem;
+}
+
+.nav-item:hover {
+  transform: scale(1.1);
 }
 
 /* MAIN CONTAINER */
@@ -111,10 +114,10 @@ body {
   margin-top: 5rem;
 }
 
-/* FLASH MESSAGES*/
+/* FLASH MESSAGES */
 
 #messages {
-  margin-top: 1.5rem;
+  margin-top: 4rem;
 }
 
 /* PROFILE */
@@ -125,17 +128,23 @@ body {
   margin-top: 5em;
 }
 
+#profile-pic-container {
+    position: relative;
+    width: 75px;
+    height: 75px;
+    border: 0.25rem solid #17a2b8;
+    top: -40px;
+    left: -50px;
+}
+
 #profile-pic {
-  display: inline-block;
-  position: relative;
-  border: 0.25rem solid red;
-  max-width: 10%;
-  height: auto;
-  top: -40px;
-  left: -280px;
+  max-width: 100%;
+  height: 100%;
+  cursor: pointer;
 }
 
 #quiz-list {
+  margin-top: 2rem;
   margin-left: 2rem;
 }
 
@@ -163,6 +172,16 @@ body {
   border-radius: 25px;
 }
 
+/* TEN FRAMES */
+
+#num-one, #num-two {
+  color: #17a2b8;
+}
+
+.sphere:hover {
+  transform: scale(1.1);
+}
+
 /* WELCOME MESSAGE */
 
 #welcome-message {
@@ -171,21 +190,33 @@ body {
   color: #17a2b8;
 }
 
+/* ADMIN VIEW */
+#admin-page-title {
+  margin-top: 3rem;
+}
+
+#database-form {
+  margin-top: 5rem;
+}
+
+.populate-questions {
+  padding: 2rem;
+  background-color: lightgrey;
+  border-radius: 25px;
+}
+
 /* MEDIA QUERIES */
 @media (min-width: 768px) {
     /* TEN FRAMES */
 
     #tenframes {
       padding-top: 1rem;
-      /*padding-left: 10rem;
-      padding-right: 10rem;*/
     }
 
     #tenframe-table-one,
     #tenframe-table-two {
       border: 4px solid #17a2b8;
     }
-
 
     .table-bordered tr,
     .table-bordered td {
@@ -204,7 +235,7 @@ body {
       padding: .25rem;
     }
 
-    #sphere {
+    .sphere {
       height: 3rem;
       width: 3rem;
       background-color: #212529;
@@ -223,8 +254,6 @@ body {
    #sidebar, ul {
      list-style-type: none;
    }
-
-
 }
 
 @media (max-width: 768px) {
@@ -237,42 +266,4 @@ body {
   #sidebar {
     display: none;
   }
-
 }
-
-/* UNUSED STYLES */
-
-/*#character {
-  padding-top: .25rem;
-  padding-bottom: .25rem;
-}
-
-#left-eye {
-  height: 20px;
-  width: 20px;
-  background-color: #555;
-  border-radius: 50%;
-}
-
-#right-eye {
-  height: 20px;
-  width: 20px;
-  background-color: blue;
-  border-radius: 50%;
-}
-
-#left-pupil,
-#right-pupil {
-  height: 10px;
-  width: 10px;
-  background-color: black;
-  border-radius: 50%;
-}
-
-#triangle {
-  width: 0;
-  height: 0;
-  border-left: 25px solid transparent;
-  border-right: 25px solid transparent;
-  border-top: 50px solid purple;
-}*/

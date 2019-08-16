@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<h1 class="h5 text-center" id="admin-page-title">Admin Page</h1>
+<div class="database-form">
+    <form class="database-questions" id="populate-questions" action="{{ url_for('populate') }}" method="POST" enctype="multipart/form-data">
+        <fieldset class="form-group">
+            <legend class="col-form-label col-sm-4 pt-0">Populate Questions</legend>
+            <div class="col-sm-8">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="additionRadio" name="populate-questions" value="+" required>
+                    <label class="form-check-label" for="additionRadio">Addition 0-100</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="subtractionRadio" name="populate-questions" value="-" required>
+                    <label class="form-check-label" for="subtractionRadio">Subtraction 0-100</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="multiplicationRadio" name="populate-questions" value="*" required>
+                    <label class="form-check-label" for="multiplicationRadio">Multiplication 0-100</label>
+                </div>
+            </div>
+        </fieldset>
+        <div class="col-sm-8">
+            <button type="submit" class="btn btn-info">Populate</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

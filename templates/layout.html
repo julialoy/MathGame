@@ -10,62 +10,69 @@
 
 <body>
 <header>
-    <!-- <div class="container d-flex justify-content-center">
-        <h1 class="text-info py-5">Math Quiz!</h1>
-    </div>
-    -->
+    {% if current_user.is_authenticated and not current_user.is_admin %}
+        <div class="container-fluid" id="navbar">
+            <nav class="navbar fixed-top navbar-dark bg-info">
+              <a class="navbar-brand" href="{{ url_for('index') }}">Math Game!</a>
+                <ul class="navbar-nav mr-auto mt-2 mt-lg-0 d-inline-flex flex-row">
+                    <li class="nav-item">
+                        <a class="nav-item nav-link" href="{{ url_for('profile') }}">
+                            Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-item nav-link" href="{{ url_for('startquickquiz') }}">
+                        Start Quick Quiz
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-item nav-link" href="{{ url_for('startcustomquiz') }}">
+                            Start Custom Quiz
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-item nav-link" href="{{ url_for('logout') }}">
+                        Sign Out
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    {% elif current_user.is_authenticated and current_user.is_admin %}
+        <div class="container-fluid" id="navbar">
+            <nav class="navbar fixed-top navbar-dark bg-info">
+              <a class="navbar-brand" href="{{ url_for('index') }}">Math Game!</a>
+                <ul class="navbar-nav mr-auto mt-2 mt-lg-0 d-inline-flex flex-row">
+                    <li class="nav-item">
+                        <a class="nav-item nav-link" href="{{ url_for('logout') }}">
+                            Sign Out
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
 </header>
 
 <main role="main" class="container">
-    <div class="row justify-content-center" id="messages">
+    <div id="messages">
         {% with messages=get_flashed_messages() %}
-        {% if messages %}
-        <div class="alert alert-danger" role="alert">
-            {% for message in messages %}
-            <div class="col-sm" id="flash-message">
-                {{ message }}
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
+            {% if messages %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {% for message in messages %}
+                        <div class="col-sm" id="flash-message">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endif %}
         {% endwith %}
     </div>
-    {% if current_user.is_authenticated %}
-    <div class="container-fluid" id="navbar">
-        <nav class="navbar fixed-top navbar-dark bg-info">
-          <a class="navbar-brand" href="{{ url_for('index') }}">Math Game!</a>
-            <ul class="navbar-nav mr-auto mt-2 mt-lg-0 d-inline-flex flex-row">
-                <li class="nav-item"><a class="nav-item nav-link" href="{{ url_for('profile') }}">Profile</a></li>
-                <li class="nav-item"><a class="nav-item nav-link" href="{{ url_for('startquickquiz') }}">
-                    Start Quick Quiz
-                </a></li>
-                <li class="nav-item"><a class="nav-item nav-link" href="{{ url_for('startcustomquiz') }}">
-                    Start Custom Quiz
-                </a></li>
-                <li class="nav-item"><a class="nav-item nav-link" href="{{ url_for('logout') }}">
-                    Sign Out
-                </a></li>
-            </ul>
-        </nav>
-    </div>
-    {% endif %}
-
     {% block content %} {% endblock %}
-<!--    <div class="container" id="character">
-        <div class="d-flex" id="eyes">
-            <div id="left-eye">
-                <div id="left-pupil"></div>
-            </div>
-            <div id="right-eye">
-                <div id="right-pupil"></div>
-            </div>
-        </div>
-        <div id="triangle"></div>
-    </div>-->
 </main>
-
-
-
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
