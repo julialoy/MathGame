@@ -1,39 +1,13 @@
-# Add: User classes---e.g., student, teacher, administrator --> ADDED w/out distinct functionality
-# Add ability to create custom quiz --> ADDED
-# End of quiz screen should show how many questions you got right/wrong for that quiz. Could also show a bar graph. ADDED w/out graph
-# Move overall right/wrong to a profile/statistics page
-# Overall scores should be available on profile page. --> ADDED
-# Scores for quick quizzes not kept in database. Scores for teacher-assigned quizzes or custom named quizzes should
-# be kept in database and separated by quiz type. Need to add new table for keeping quizzes.
-# Add ability to create a quiz with more than one kind of fact (addition AND subtraction, etc.)
-# Add sidebar for some of this stuff --> ADDED
-# Add ability to save your custom quiz --> ADDED
-# Add profile page with stats --> ADDED, bare bones
-# Add list of your saved custom quizzes --> ADDED
-# Change list of custom quizzes in sidebar to show only most recent 5 (or 10).
-# If more than that number sidebar should show a button for "more" that takes you to your profile page
-# Teachers should be able to: see list of all their students by class, create a new class (w/class code), create and save quizzes,
-# assign specific quizzes to students/classes with due dates, create assignments (e.g., take 4 addition quizzes by Tues.), see student
-# progress, send messages to students (?)
-# Students should be able to send messages to teacher for help on a specific quiz (?)
-# Distinct functionality for different classes
-# Graphs to visually show progress over time
-# Fix navbar so active page is styled as active
-# Add tooltips to custom quiz page
-# Cosnider removing placeholder text from start/end numbers on custom quiz page
-# Add division
-# Change profile upload image to a question mark in a circle, which is also the link for uploading/changing pic
-# Change to Flask Blueprints
-# Add ability to show graphs for trends in user profile using numPy
 from datetime import datetime
+from functools import wraps
 import os
 
 from flask import (Flask, flash, g, jsonify, redirect, render_template, request,
-                   send_from_directory, session, sessions, url_for)
+                   send_from_directory, session, url_for)
 from flask_bcrypt import check_password_hash
-from flask_login import (current_user, LoginManager, login_required, login_user,
-                         logout_user, UserMixin)
+from flask_login import current_user, LoginManager, login_required, login_user, logout_user
 from werkzeug.utils import secure_filename
+from peewee import *
 
 import models
 
@@ -47,125 +21,55 @@ app.secret_key = 'dshfjkrehtuia^&#C@@%&*(fdsh21243254235'
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = "login"
+login_manager.login_view = 'login'
+
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if g.user.is_admin is False:
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 def allowed_file(filename):
+    """Checks that the filename contains an extension.
+    Checks that the extension is in ALLOWED_EXTENSIONS.
+    """
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-#
-# class Test:
-#     """Creates the math test from the test type (description), a dictionary of the math questions and answers (created
-#         by the CreateMathFacts class), and the number of questions.
-#     """
-#     def __init__(self, test_type, test_questions_answers, test_length=-1):
-#         self.test_type = test_type
-#         self.test_questions_answers = test_questions_answers
-#         if test_length == -1 or test_length > len(self.test_questions_answers):
-#             self.test_length = len(self.test_questions_answers)
-#         else:
-#             self.test_length = test_length
-#         self.test_questions = random.sample(list(self.test_questions_answers), self.test_length)
-#
-#     def test_type(self):
-#         return self.test_type
-#
-#     def list_questions(self):
-#         for question in self.test_questions_answers:
-#             print(question)
-#
-#     def test_length(self):
-#         return self.test_length
-#
-#     def grab_question(self):
-#         return self.test_questions.pop()
-#
-#     def grab_answer(self, quiz_question):
-#         return self.test_questions_answers[quiz_question]
-#
-#
-# class CreateMathFacts:
-#     """Creates the set of questions and answers to feed into the Test class. Takes an operator (+, -, *), whether or
-#         not to allow negative answers (true/false), a starting number, and an ending number to use when creating
-#         the facts. For example, if you want to test addition math facts from 0 to 10, the start number is 0, the
-#         end number is 10.
-#     """
-#     def __init__(self, math_op="+", start_num=0, end_num=10, neg_answers=False):
-#         self.math_op = math_op
-#         self.start_num = start_num
-#         self.end_num = end_num
-#         self.neg_answers = neg_answers
-#
-#     math_operators = {"+": operator.add,
-#                       "-": operator.sub,
-#                       "*": operator.mul,
-#                       }
-#
-#     def create_facts(self):
-#         facts = {}
-#         first_num = 0
-#
-#         def in_dict(k, v, dictionary):
-#             if self.neg_answers is True:
-#                 if k not in dictionary:
-#                     dictionary[k] = v
-#             elif self.neg_answers is False:
-#                 if k not in dictionary and v >= 0:
-#                     dictionary[k] = v
-#
-#         while first_num <= self.end_num:
-#             for i in range(self.start_num, self.end_num+1):
-#                 key1 = "{} {} {}".format(first_num, self.math_op, i)
-#                 value1 = self.math_operators[self.math_op](first_num, i)
-#                 in_dict(key1, value1, facts)
-#                 #print(key1)
-#
-#                 if first_num != i:
-#                     key2 = "{} {} {}".format(i, self.math_op, first_num)
-#                     value2 = self.math_operators[self.math_op](i, first_num)
-#                     in_dict(key2, value2, facts)
-#                     key3 = "{} {} {}".format(i, self.math_op, i)
-#                     value3 = self.math_operators[self.math_op](i, i)
-#                     in_dict(key3, value3, facts)
-#                     #print(key2)
-#                     #print(key3)
-#             first_num += 1
-#
-#         return facts
 
-
-# Old function to run the test on the command line.
-# def run_test(test):
-#     num_correct = 0
-#     num_wrong = 0
-#     while len(test.test_questions) >= 1:
-#         question = test.grab_question()
-#         print("----> ", question)
-#         answer = int(input("Your Answer: "))
-#         if answer == test.test_questions_answers[question]:
-#             print("CORRECT!")
-#             num_correct += 1
-#         else:
-#             print("WRONG!")
-#             num_wrong += 1
-#     print("Number Correct: ", num_correct)
-#     print("Number Wrong: ", num_wrong)
-
-
-#TESTMATHFACTS = CreateMathFacts().create_facts()
-#EXAMPLETEST = Test("Basic Addition Math Facts from 0 to 10", TESTMATHFACTS, 10)
+def get_question(operation, qstn_type, num_start, num_end):
+    q = (models.Questions.select()
+         .where(models.Questions.question_op == operation,
+                models.Questions.question_type == qstn_type,
+                models.Questions.first_num >= num_start,
+                models.Questions.first_num <= num_end,
+                models.Questions.second_num >= num_start,
+                models.Questions.second_num <= num_end)
+         .order_by(fn.Random()).limit(1)
+         )
+    return q
 
 
 @login_manager.user_loader
-def load_user(id):
+def load_user(user_id):
+    """Tries to load the user from the database using the user id.
+    If the user can be loaded, returns the user with that id.
+    Otherwise, returns None.
+    """
     try:
-        return models.User.get(models.User.id == id)
+        return models.User.get(models.User.id == user_id)
     except models.DoesNotExist:
         return None
 
 
 @app.before_request
 def before_request():
+    """Before a request, connects to the global database, opens a connection, and sets the global user as the
+    current user.
+    """
     g.db = models.DATABASE
     g.db.connection()
     g.user = current_user
@@ -173,80 +77,44 @@ def before_request():
 
 @app.after_request
 def after_request(response):
+    """After a request, closes the connection to the database and returns the response."""
     g.db.close()
     return response
 
 
-@app.route("/", methods=["GET", "POST"])
-def index():
-    if not current_user.is_authenticated:
-        return render_template('login.html')
-    else:
-        if 'username' in session:
-            quiz_list = (models.SavedQuizzes.select()
-                         .join(models.User, on=(models.SavedQuizzes.user_id == models.User.id))
-                         .where(models.User.id == current_user.id))
-
-            print("Logged in as {}".format(session['username']))
-        return render_template('index.html', quiz_list=quiz_list)
-
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.form:
-        user_info = request.form
-        username = user_info['username']
-        password = user_info['password']
-        try:
-            user = models.User.get(models.User.username == username)
-        except models.DoesNotExist:
-            flash("That username or password is incorrect. OMG BATS")
-            return render_template('login.html')
-        else:
-            if check_password_hash(user.password, password):
-                session['username'] = username
-                login_user(user)
-                return redirect(url_for('index'))
-            else:
-                flash("That username or password is incorrect. OMG CATS")
-                return render_template('login.html')
-    else:
-        return render_template('login.html')
-
-
-@app.route("/logout")
-@login_required
-def logout():
-    session.pop('username', None)
-    session.pop('current_quiz', None)
-    session.pop('current_facts', None)
-    session.pop('current_quiz_desc', None)
-    session.pop('current_num_correct', None)
-    session.pop('current_num_incorrect', None)
-    session.pop('current_user_score', None)
-    logout_user()
-    return redirect(url_for('index'))
-
-
-@app.route("/register", methods=["GET", "POST"])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
+    """Accesses the username and password supplied by the user through the HTML form and tries to create
+    a user and score model for the new user.
+    If successful, redirects the user to the login page.
+    If unsuccessful, reloads the registration page.
+    """
     if request.form:
-        user_reg = request.form
-        username = user_reg['username']
-        password = user_reg['password']
-        print("USERNAME", username)
-        print("PASSWORD: ", password)
+        user_registration = request.form
+        if 'is-admin' in user_registration.keys():
+            is_admin = True
+        else:
+            is_admin = False
+
+        if 'is-teacher' in user_registration.keys():
+            is_teacher = True
+        else:
+            is_teacher = False
+
+        if is_admin or is_teacher is True:
+            is_student = False
+        else:
+            is_student = True
+        username = user_registration['username']
+        password = user_registration['password']
         try:
-            models.User.create_user(
-                username=username,
-                password=password
-            )
-            # models.Score.create(
-            #     user_id=models.User.get(models.User.username == username),
-            #     total_quiz_num=0,
-            #     total_questions_correct=0,
-            #     total_questions_wrong=0,
-            # )
+            models.User.create_user(username=username,
+                                    password=password,
+                                    admin=is_admin,
+                                    student=is_student,
+                                    teacher=is_teacher
+                                    )
+            flash('Registration successful. Please log in.')
             return redirect(url_for('login'))
         except ValueError:
             return render_template('register.html')
@@ -254,131 +122,167 @@ def register():
         return render_template('register.html')
 
 
-@app.route("/profile", methods=["GET", "POST"])
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Logs an existing user in and creates information for the current session after checking the password hash.
+    Provides error messages if a username or password is incorrect.
+    """
+    if request.form:
+        user_info = request.form
+        username = user_info['username']
+        password = user_info['password']
+        try:
+            user = models.User.get(models.User.username == username)
+        except models.DoesNotExist:
+            flash('That username or password is incorrect.')
+            return render_template('login.html')
+        else:
+            if check_password_hash(user.password, password):
+                session['username'] = username
+                login_user(user)
+                return redirect(url_for('index'))
+            else:
+                flash('That username or password is incorrect.')
+                return render_template('login.html')
+    else:
+        return render_template('login.html')
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    """Logs a user out and removes information from the current session."""
+    session.pop('username', None)
+    session.pop('current_quiz_id', None)
+    session.pop('current_quiz', None)
+    session.pop('current_facts', None)
+    session.pop('current_qstn_type', None)
+    session.pop('current_end_start', None)
+    session.pop('current_quiz_desc', None)
+    session.pop('previous_questions', None)
+    session.pop('current_num_correct', None)
+    session.pop('current_num_incorrect', None)
+    session.pop('current_user_score', None)
+    logout_user()
+    return redirect(url_for('index'))
+
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    """If the current user is not authenticated/there is no current user,
+    show the login page.
+    Otherwise show the index.
+    """
+    if not current_user.is_authenticated:
+        return render_template('login.html')
+    elif current_user.is_admin:
+        return redirect(url_for('admin'))
+    else:
+        selected_user = models.User.get(models.User.id == current_user.id)
+        user_quizzes = (models.UserQuizzes.select()
+                        .where(models.UserQuizzes.user_id == current_user.id))
+        quiz_list = user_quizzes[:5]
+        return render_template('index.html',
+                               selected_user=selected_user,
+                               quiz_list=quiz_list
+                               )
+
+
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    selected_user = models.User.get(models.User.id==current_user.id)
-    selected_user_info, created = models.UserInfo.get_or_create(
-        user_id=current_user.id,
-        defaults={'pic': ""}
-    )
-    quiz_list = (models.SavedQuizzes.select()
-                 .join(models.User, on=(models.SavedQuizzes.user_id==models.User.id))
-                 .where(models.User.id==current_user.id))
+    selected_user = models.User.get(models.User.id == current_user.id)
+    quiz_list = (models.UserQuizzes.select()
+                 .where(models.UserQuizzes.user_id == current_user.id))
+    total_quizzes = (models.QuizAttempts.select()
+                     .join(models.User, on=(models.QuizAttempts.user_id == models.User.id))
+                     .where(models.User.id == current_user.id))
+    quiz_types = [quiz.quiz_type for quiz in total_quizzes]
 
-    num_quiz_total = (models.UserScores.select()
-                      .join(models.User, on=(models.UserScores.user_id == models.User.id))
-                      .where(models.User.id == current_user.id))
-    print(len(num_quiz_total))
-    quiz_types = (models.UserScores.select()
-                  .join(models.User, on=(models.UserScores.user_id == models.User.id))
-                  .where(models.User.id == current_user.id))
-    quiz_types_taken = [quiz_type.quiz_type for quiz_type in quiz_types]
-    print(quiz_types_taken)
-    # overall_scores = (models.UserScores.select()
-    #                   .join(models.User, on=(models.UserScores.user_id==models.User.id))
-    #                   .where(models.User.id==current_user.id))
     return render_template('profile.html',
-                           quiz_list=quiz_list,
-                           # overall_scores=overall_scores,
                            selected_user=selected_user,
-                           selected_user_info=selected_user_info)
+                           quiz_list=quiz_list,
+                           total_quizzes=total_quizzes,
+                           quiz_types=quiz_types
+                           )
 
 
-@app.route("/uploader", methods=["GET", "POST"])
+@app.route('/uploader', methods=['GET', 'POST'])
 @login_required
 def uploader():
-    selected_user = g.user.id
+    selected_user = models.User.get(models.User.id == current_user.id)
 
-    if request.method == "POST":
+    if request.method == 'POST':
         if 'file' not in request.files:
-            flash("No file part")
+            flash('No file part')
             return redirect(request.url)
     file = request.files['file']
 
     if file.filename == '':
-        flash("No file selected")
+        flash('No file selected')
         return redirect(request.url)
 
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        selected_user_info, created = models.UserInfo.get_or_create(
-            user_id=selected_user,
-            defaults={'pic': ""}
-        )
-        q = models.UserInfo.update(
-            pic=filename
-        ).where(models.UserInfo.user_id==selected_user_info.user_id)
+        q = models.User.update(pic=filename).where(models.User.id == selected_user)
         q.execute()
         return redirect(url_for('profile', user_id=selected_user))
 
 
-@app.route("/uploads/<filename>")
+@app.route('/uploads/<filename>')
 @login_required
 def upload_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
-@app.route("/removeimage/<filename>", methods=["GET", "POST"])
+@app.route('/removeimage', methods=["GET", "POST"])
 @login_required
-def remove_file(filename):
-    selected_user = models.User.get(models.User.id==current_user.id)
-    selected_user_info = models.UserInfo.get(models.UserInfo.user_id==selected_user.id)
-    item_id = filename
-    #print("filename is {}".format(filename))
-    q = models.UserInfo.update(
-        pic=""
-    ).where(models.UserInfo.user_id==selected_user_info.user_id)
-    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], item_id))
+def remove_pic():
+    """Removes a profile picture from a user's profile.
+    Does not delete the file from the upload folder.
+    """
+    selected_user = models.User.get(models.User.id == current_user.id)
+    q = models.User.update(pic='math_profile_blank.png').where(models.User.id == selected_user)
     q.execute()
     return redirect(url_for('profile'))
 
 
-@app.route("/startquickquiz", methods=["GET", "POST"])
+@app.route('/startquickquiz', methods=['GET', 'POST'])
 @login_required
 def startquickquiz():
-    #new_test = Test("Basic Addition Math Facts from 0 to 10", CreateMathFacts().create_facts(), 10)
-    new_test = models.SavedQuizzes(user=current_user.id,
-                                   quiz_name="Basic Addition Math Facts from 0 to 10",
-                                   created_by=current_user.id,
-                                   assigned_by=None,
-                                   math_op="+",
-                                   starting_num=0,
-                                   ending_num=10,
-                                   allow_neg_answers=False,
-                                   quiz_length=10,
-                                   )
-    current_facts = new_test.create_facts()
-    current_quiz = new_test.create_test(current_facts)
-    current_user_score = models.UserScores.create(
-        user_id=current_user.id,
-        quiz_id=0,
-        quiz_type="+",
-        questions_correct=0,
-        questions_wrong=0,
-        questions_total=10,
-        date_taken=datetime.now()
-    )
-    session['current_facts'] = current_facts
-    session['current_quiz'] = current_quiz
-    session['current_quiz_desc'] = new_test.quiz_name
+    """Starts a quiz with 10 random addition facts using numbers from 0 to 10 and adds the quiz to the current
+    session for the current user.
+    """
+    # Quick quizzes and unsaved custom quizzes still need to generate a unique quiz id ?
+    # This will allow all quizzes to be recreated, effectively saving a quiz that a user doesn't want to save?
+    current_user_score = models.QuizAttempts.create(user_id=current_user.id,
+                                                  quiz_id=0,
+                                                  quiz_type="+",
+                                                  questions_crrect=0,
+                                                  questions_wrong=0,
+                                                  questions_total=10,
+                                                  date_take=datetime.now()
+                                                  )
+    session['current_quiz_id'] = None
+    session['current_facts'] = 10
+    session['current_quiz'] = '+'
+    session['current_qstn_type'] = 'Equation'
+    session['current_end_start'] = [0, 10]
+    session['current_quiz_desc'] = 'Basic Addition Math Facts from 0 to 10'
+    session['previous_questions'] = []
     session['current_num_correct'] = 0
     session['current_num_incorrect'] = 0
     session['current_user_score'] = current_user_score.id
-
-    # Add a new row instead (above)
-
-    # q = (models.UserScores
-    #      .update({models.UserScores.total_quiz_num: models.UserScores.total_quiz_num + 1})
-    #      .where(models.Score.user_id == current_user.id))
-    # q.execute()
     return redirect(url_for('index'))
 
 
-@app.route("/startcustomquiz", methods=["GET", "POST"])
+@app.route('/startcustomquiz', methods=['GET', 'POST'])
 @login_required
 def startcustomquiz():
+    """Starts a custom math quiz. The user decides on the math operation, starting and ending numbers, and
+    number of questions. Adds the new quiz as the current quiz to the session.
+    """
     if request.form:
         quiz_setup = request.form
         quiz_desc = quiz_setup['test-name']
@@ -395,136 +299,175 @@ def startcustomquiz():
         else:
             quiz_end = 10
 
-        new_cust_quiz = models.SavedQuizzes(user=current_user.id,
-                                            quiz_name=quiz_desc,
-                                            created_by=current_user.id,
-                                            assigned_by=current_user.id,
-                                            math_op=quiz_op,
-                                            starting_num=quiz_start,
-                                            ending_num=quiz_end,
-                                            allow_neg_answers=False,
-                                            quiz_length=quiz_length,
-                                            )
+        new_cust_quiz = models.Quizzes(math_op=quiz_op,
+                                       starting_num=quiz_start,
+                                       ending_num=quiz_end,
+                                       allow_neg_answers=False,
+                                       quiz_length=quiz_length
+                                       )
+        new_cust_quiz.save()
 
         if quiz_setup['save-quiz'] == 'yes':
-            new_cust_quiz.save()
+            models.UserQuizzes.create(user_id=current_user.id,
+                                      quiz_name=quiz_desc,
+                                      quiz_id=new_cust_quiz.id
+                                      )
 
-        cust_facts = new_cust_quiz.create_facts()
-        cust_quiz = new_cust_quiz.create_test(cust_facts)
-        current_user_score = models.UserScores.create(
-            user_id=current_user.id,
-            quiz_id=new_cust_quiz.id,
-            quiz_type=quiz_op,
-            questions_correct=0,
-            questions_wrong=0,
-            questions_total=quiz_length,
-            date_taken=datetime.now()
-        )
-        session['current_facts'] = cust_facts
-        session['current_quiz'] = cust_quiz
-        session['current_quiz_desc'] = new_cust_quiz.quiz_name
+        cust_id = new_cust_quiz.id
+
+        current_user_score = models.QuizAttempts.create(user_id=current_user.id,
+                                                        quiz_id=cust_id,
+                                                        quiz_type=quiz_op,
+                                                        questions_correct=0,
+                                                        questions_wrong=0,
+                                                        questions_total=quiz_length,
+                                                        date_taken=datetime.now()
+                                                        )
+        session['current_quiz_id'] = cust_id
+        session['current_facts'] = quiz_length
+        session['current_quiz'] = quiz_op
+        session['current_qstn_type'] = 'Equation'
+        session['current_end_start'] = [quiz_start, quiz_end]
+        session['current_quiz_desc'] = quiz_desc
+        session['previous_questions'] = []
         session['current_num_correct'] = 0
         session['current_num_incorrect'] = 0
         session['current_user_score'] = current_user_score.id
-        # Add a new row instead (above)
-
-        # q = (models.Score
-        #      .update({models.Score.total_quiz_num: models.Score.total_quiz_num + 1})
-        #      .where(models.Score.user_id == current_user.id))
-        # q.execute()
-
         return redirect(url_for('index'))
     else:
         return render_template('startquiz.html')
 
 
-@app.route("/startsavedquiz/<saved_quiz_id>", methods=["GET", "POST"])
+@app.route('/startsavedquiz/<saved_quiz_id>', methods=['GET', 'POST'])
 @login_required
 def startsavedquiz(saved_quiz_id):
-    saved_quiz_base = (models.SavedQuizzes.get(models.SavedQuizzes.id == saved_quiz_id))
-    saved_quiz_facts = saved_quiz_base.create_facts()
-    saved_quiz = saved_quiz_base.create_test(saved_quiz_facts)
-    # Add a new row instead
-    current_user_score = models.UserScores.create(
-        user_id=current_user.id,
-        quiz_id=saved_quiz_id,
-        quiz_type=saved_quiz_base.math_op,
-        questions_correct=0,
-        questions_wrong=0,
-        questions_total=saved_quiz_base.quiz_length,
-        date_taken=datetime.now()
-    )
-    session['current_facts'] = saved_quiz_facts
-    session['current_quiz'] = saved_quiz
-    session['current_quiz_desc'] = saved_quiz_base.quiz_name
+    # Currently this does not allow you to retake the exact same questions
+    # Need to fix question view to do that
+    basic_info = models.UserQuizzes.get(models.UserQuizzes.id == saved_quiz_id)
+    base = models.Quizzes.get(models.Quizzes.id == saved_quiz_id)
+    current_user_score = models.QuizAttempts.create(user_id=current_user.id,
+                                                    quiz_id=saved_quiz_id,
+                                                    quiz_type=base.math_op,
+                                                    questions_correct=0,
+                                                    questions_wrong=0,
+                                                    questions_total=base.quiz_length,
+                                                    date_taken=datetime.now()
+                                                    )
+    session['current_quiz_id'] = base.id
+    session['current_facts'] = base.quiz_length
+    session['current_quiz'] = base.math_op
+    session['current_qstn_type'] = 'Equation'
+    session['current_end_start'] = [base.starting_num, base.ending_num]
+    session['current_quiz_desc'] = basic_info.quiz_name
+    session['previous_questions'] = []
     session['current_num_correct'] = 0
     session['current_num_incorrect'] = 0
     session['current_user_score'] = current_user_score.id
-    # q = (models.Score
-    #      .update({models.Score.total_quiz_num: models.Score.total_quiz_num + 1})
-    #      .where(models.Score.user_id == current_user.id))
-    # q.execute()
     return redirect(url_for('index'))
 
 
-@app.route("/question", methods=["GET"])
+@app.route('/question', methods=['GET'])
 @login_required
 def question():
     try:
-        len(session['current_quiz']) > 0
-    except:
+        session['current_facts']
+    except KeyError:
         return jsonify(question="You haven't started a quiz!")
     else:
-        if len(session['current_quiz']) >= 1:
-            new_question = session['current_quiz'].pop()
-            session['current_quiz'] = session['current_quiz']
-            return jsonify(question=new_question)
+        if session['current_facts'] > 0:
+            problem = get_question(session['current_quiz'], session['current_qstn_type'],
+                                   session['current_end_start'][0], session['current_end_start'][1])
+
+            if problem[0].id in session['previous_questions']:
+                # Delete after more testing
+                print("NEED NEW PROBLEM: {}".format(problem[0].id))
+                problem = get_question(session['current_quiz'], session['current_qstn_type'],
+                                       session['current_end_start'][0], session['current_end_start'][1])
+
+            session['current_question'] = problem[0].id
+            # Delete after more testing
+            print("CURRENT QUESTION ID: {}".format(problem[0].id))
+            session['previous_questions'].append(problem[0].id)
+            # Delete after more testing
+            print("PREV QSTS: {}".format(session['previous_questions']))
+            qst = problem[0].question
+            session['current_facts'] -= 1
+            # Delete after more testing
+            print("CURRENT FACTS: {}".format(session['current_facts']))
+            return jsonify(question=qst)
         else:
-            # q = (models.Score.select()
-            #                  .join(models.User, on=(models.Score.user_id == models.User.id))
-            #                  .where(models.User.id == current_user.id))
-            # overall_correct = [num.questions_correct for num in session['current_user_score']]
-            # overall_incorrect = [num.questions_wrong for num in session['current_user_score']]
             current_correct = session['current_num_correct']
             current_incorrect = session['current_num_incorrect']
-            return jsonify(question="End of Quiz!",
-                           # overall_correct=overall_correct,
-                           # overall_incorrect=overall_incorrect,
+            return jsonify(question='End of Quiz!',
                            current_correct=current_correct,
                            current_incorrect=current_incorrect,
                            )
 
 
-@app.route("/checkanswer", methods=["GET", "POST"])
+@app.route('/checkanswer', methods=['GET', 'POST'])
+@login_required
 def checkanswer():
     data = request.form
-    quiz_question = data['question']
-    # user_answer = int(data['userAnswer'])
     try:
         user_answer = int(data['userAnswer'])
     except ValueError:
-        return jsonify(answer="Try again! Please enter a number.")
+        return jsonify(answer='Try again! Please enter a number.')
     else:
-        if user_answer == session['current_facts'][quiz_question]:
-            q = (models.UserScores.update({models.UserScores.questions_correct: models.UserScores.questions_correct + 1})
-                 .where(models.UserScores.id == session['current_user_score']))
-            q.execute()
-            # q = (models.Score
-            #      .update({models.Score.total_questions_correct: models.Score.total_questions_correct + 1})
-            #      .where(models.Score.user_id == current_user.id))
-            # q.execute()
+        correct_answer = models.Questions.get(models.Questions.id == session['current_question']).answer
+        if user_answer == correct_answer:
+            q_c1 = (models.QuizAttempts
+                    .update({models.QuizAttempts.questions_correct: models.QuizAttempts.questions_correct + 1})
+                    .where(models.QuizAttempts.id == session['current_user_score']))
+            q_c1.execute()
+            models.QuestionAttempts.create(user_id=current_user.id,
+                                           question_id=session['current_question'],
+                                           quiz_id=session['current_quiz_id'],
+                                           correct=True,
+                                           incorrect=False,
+                                           date_attempted=datetime.now()
+                                           )
             session['current_num_correct'] += 1
-            return jsonify(answer="CORRECT!")
+            return jsonify(answer='CORRECT!')
         else:
-            q = (models.UserScores.update({models.UserScores.questions_wrong: models.UserScores.questions_wrong + 1})
-                 .where(models.UserScores.id == session['current_user_score']))
-            q.execute()
-            # q = (models.Score
-            #      .update({models.Score.total_questions_wrong: models.Score.total_questions_wrong + 1})
-            #      .where(models.Score.user_id == current_user.id))
-            # q.execute()
+            q_w1 = (models.QuizAttempts
+                    .update({models.QuizAttempts.questions_wrong: models.QuizAttempts.questions_wrong + 1})
+                    .where(models.QuizAttempts.id == session['current_user_score']))
+            q_w1.execute()
+            models.QuestionAttempts.create(user_id=current_user.id,
+                                           question_id=session['current_question'],
+                                           quiz_id=session['current_quiz_id'],
+                                           correct=False,
+                                           incorrect=True,
+                                           date_attempted=datetime.now()
+                                           )
             session['current_num_incorrect'] += 1
             return jsonify(answer="Sorry! That's not the right answer.")
+
+
+@app.route('/admin', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin():
+    return render_template('admin.html')
+
+
+@app.route('/populate', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def populate():
+    """Allows administrators to populate the Questions table with questions.
+    Questions are used to create quizzes for all users.
+    """
+    if request.form:
+        form = request.form
+        quest_type = form['populate-questions']
+        try:
+            models.Questions.mass_populate(quest_type)
+        except IntegrityError:
+            flash('Unable to populate database.')
+        else:
+            flash('Database populated successfully.')
+    return render_template('admin.html')
 
 
 if __name__ == '__main__':
