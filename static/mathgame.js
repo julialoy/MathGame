@@ -67,16 +67,14 @@ const emptyTenframe = () => {
   const tableTwo = document.getElementById('tenframe-table-two');
   const tableOneCells = tableOne.getElementsByTagName("td");
   const tableTwoCells = tableTwo.getElementsByTagName("td");
-  const numOneText = document.getElementById('num-one');
-  const numTwoText = document.getElementById('num-two');
   for (i = 0; i < 10; i++) {
     const redSphereOne = tableOneCells[i].firstChild;
     const redSphereTwo = tableTwoCells[i].firstChild;
     redSphereOne.setAttribute("style", "background-color:#212529");
     redSphereTwo.setAttribute("style", "background-color:#212529");
   }
-  numOneText.append('');
-  numTwoText.append('');
+  $('#num-one').empty();
+  $('#num-two').empty();
 };
 
 //Get the next quiz question
