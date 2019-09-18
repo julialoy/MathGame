@@ -33,6 +33,15 @@ def admin_required(f):
     return decorated_function
 
 
+def teacher_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if g.user.is_teacher is False:
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 def allowed_file(filename):
     """Checks that the filename contains an extension.
     Checks that the extension is in ALLOWED_EXTENSIONS.
@@ -177,6 +186,8 @@ def index():
         return render_template('login.html')
     elif current_user.is_admin:
         return redirect(url_for('admin'))
+    elif current_user.is_teacher:
+        return redirect(url_for('teacher'))
     else:
         selected_user = models.User.get(models.User.id == current_user.id)
         user_quizzes = (models.UserQuizzes.select()
@@ -257,13 +268,13 @@ def startquickquiz():
     # Quick quizzes and unsaved custom quizzes still need to generate a unique quiz id ?
     # This will allow all quizzes to be recreated, effectively saving a quiz that a user doesn't want to save?
     current_user_score = models.QuizAttempts.create(user_id=current_user.id,
-                                                  quiz_id=0,
-                                                  quiz_type="+",
-                                                  questions_crrect=0,
-                                                  questions_wrong=0,
-                                                  questions_total=10,
-                                                  date_take=datetime.now()
-                                                  )
+                                                    quiz_id=0,
+                                                    quiz_type="+",
+                                                    questions_crrect=0,
+                                                    questions_wrong=0,
+                                                    questions_total=10,
+                                                    date_take=datetime.now()
+                                                    )
     session['current_quiz_id'] = None
     session['current_facts'] = 10
     session['current_quiz'] = '+'
@@ -442,6 +453,13 @@ def checkanswer():
                                            )
             session['current_num_incorrect'] += 1
             return jsonify(answer="Sorry! That's not the right answer.")
+
+
+@app.route('/teacher', methods=['GET', 'POST'])
+@login_required
+@teacher_required
+def teacher():
+    return render_template('teacher.html')
 
 
 @app.route('/admin', methods=['GET', 'POST'])
