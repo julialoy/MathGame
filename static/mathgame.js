@@ -252,3 +252,8 @@ $('#profile-pic').click( evt => {
 $('#remove-pic').click( evt => {
   location.href = '/removeimage';
 });
+
+//Make Add Student button in teacher view display add student modal
+$('#teacher-add-student').click( evt => {
+    $('#addStudentModal').modal('show');
+});

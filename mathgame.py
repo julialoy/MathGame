@@ -123,7 +123,7 @@ def register():
                                     student=is_student,
                                     teacher=is_teacher
                                     )
-            flash('Registration successful. Please log in.')
+            flash('Registration successful. Please log in.', 'success')
             return redirect(url_for('login'))
         except ValueError:
             return render_template('register.html')
@@ -143,7 +143,7 @@ def login():
         try:
             user = models.User.get(models.User.username == username)
         except models.DoesNotExist:
-            flash('That username or password is incorrect.')
+            flash('That username or password is incorrect.', 'danger')
             return render_template('login.html')
         else:
             if check_password_hash(user.password, password):
@@ -151,7 +151,7 @@ def login():
                 login_user(user)
                 return redirect(url_for('index'))
             else:
-                flash('That username or password is incorrect.')
+                flash('That username or password is incorrect.', 'danger')
                 return render_template('login.html')
     else:
         return render_template('login.html')
@@ -225,12 +225,12 @@ def uploader():
 
     if request.method == 'POST':
         if 'file' not in request.files:
-            flash('No file part')
+            flash('No file part', 'danger')
             return redirect(request.url)
     file = request.files['file']
 
     if file.filename == '':
-        flash('No file selected')
+        flash('No file selected', 'danger')
         return redirect(request.url)
 
     if file and allowed_file(file.filename):
@@ -354,7 +354,6 @@ def startcustomquiz():
 def startsavedquiz(saved_quiz_id):
     # Currently this does not allow you to retake the exact same questions
     # Need to fix question view to do that
-    print("STARTING QUIZ NUMBER {}".format(saved_quiz_id))
     quiz_info = models.UserQuizzes.get(models.UserQuizzes.quiz_id == saved_quiz_id)
     base_quiz = models.Quizzes.get(models.Quizzes.id == saved_quiz_id)
     current_user_score = models.QuizAttempts.create(user_id=current_user.id,
@@ -392,20 +391,20 @@ def question():
 
             if problem[0].id in session['previous_questions']:
                 # Delete after more testing
-                print("NEED NEW PROBLEM: {}".format(problem[0].id))
+                # print("NEED NEW PROBLEM: {}".format(problem[0].id))
                 problem = get_question(session['current_quiz'], session['current_qstn_type'],
                                        session['current_end_start'][0], session['current_end_start'][1])
 
             session['current_question'] = problem[0].id
             # Delete after more testing
-            print("CURRENT QUESTION ID: {}".format(problem[0].id))
+            # print("CURRENT QUESTION ID: {}".format(problem[0].id))
             session['previous_questions'].append(problem[0].id)
             # Delete after more testing
-            print("PREV QSTS: {}".format(session['previous_questions']))
+            # print("PREV QSTS: {}".format(session['previous_questions']))
             qst = problem[0].question
             session['current_facts'] -= 1
             # Delete after more testing
-            print("CURRENT FACTS: {}".format(session['current_facts']))
+            # print("CURRENT FACTS: {}".format(session['current_facts']))
             return jsonify(question=qst)
         else:
             current_correct = session['current_num_correct']
@@ -463,13 +462,32 @@ def teacher():
     return render_template('teacher.html')
 
 
+@app.route('/addstudent', methods=['GET', 'POST'])
+@login_required
+@teacher_required
+def addstudent():
+    if request.form:
+        student_username = request.form['student-username']
+        student_record = models.User.get(models.User.username == student_username)
+        student_id = student_record.id
+        models.Students.create(user_id=student_id, teacher_id=current_user.id)
+        flash('Student added.', 'success')
+        return redirect(url_for('teacher'))
+    else:
+        flash('Something went wrong. Please try again.', 'danger')
+        return redirect(url_for('teacher'))
+
+
 @app.route('/saveteacherquiz', methods=['GET', 'POST'])
 @login_required
 @teacher_required
 def saveteacherquiz():
-    student_list = models.Students.select().where(models.Students.teacher_id == current_user.id)
-    if request.form:
+    student_list = (models.User.select(models.User)
+                    .join(models.Students, on=(models.User.id == models.Students.user_id))
+                    .where(models.Students.teacher_id == current_user.id)
+                    )
 
+    if request.form:
         l = request.form.to_dict()
         assigned_to = []
         for k,v in l.items():
@@ -509,7 +527,7 @@ def saveteacherquiz():
                                           quiz_id=new_quiz.id,
                                           assigned_by=current_user.id
                                           )
-        flash('Quiz saved.')
+        flash('Quiz saved.', 'success')
         return redirect(url_for('teacher'))
     else:
         return render_template('teacherquiz.html',
@@ -536,9 +554,9 @@ def populate():
         try:
             models.Questions.mass_populate(quest_type)
         except IntegrityError:
-            flash('Unable to populate database.')
+            flash('Unable to populate database.', 'danger')
         else:
-            flash('Database populated successfully.')
+            flash('Database populated successfully.', 'success')
     return render_template('admin.html')
 
 
