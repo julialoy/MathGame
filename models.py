@@ -51,6 +51,12 @@ class User(UserMixin, BaseModel):
         return False
 
 
+class Students(BaseModel):
+    """"Table to track students of teacher users."""
+    user_id = ForeignKeyField(User, unique=False)
+    teacher_id = ForeignKeyField(User, unique=False)
+
+
 class Quizzes(BaseModel):
     # quiz_name = CharField(max_length=250, unique=True)
     math_op = CharField(default='+')
@@ -58,6 +64,17 @@ class Quizzes(BaseModel):
     ending_num = IntegerField(default=10)
     allow_neg_answers = BooleanField(default=False)
     quiz_length = IntegerField(default=-1)
+
+
+class TeacherQuizzes(BaseModel):
+    teacher_id = ForeignKeyField(User, unique=False)
+    quiz_name = CharField(max_length=250)
+    quiz_id = ForeignKeyField(Quizzes, unique=True)
+
+    class Meta:
+        indexes = (
+            (('teacher_id', 'quiz_name'), True),
+        )
 
 
 class QuizAttempts(BaseModel):
@@ -83,6 +100,13 @@ class UserQuizzes(BaseModel):
             # Different users may have quizzes with the same name.
             (('user_id', 'quiz_name'), True),
         )
+
+
+class AssignedQuizzes(BaseModel):
+    """Table for quizzes assigned to students by teachers."""
+    user_id = ForeignKeyField(User, unique=False)
+    quiz_id = ForeignKeyField(Quizzes, unique=False)
+    assigned_by = ForeignKeyField(User, unique=False)
 
 
 class Questions(BaseModel):
@@ -147,5 +171,14 @@ class QuestionAttempts(BaseModel):
 
 def initialize():
     DATABASE.connect()
-    DATABASE.create_tables([User, Quizzes, QuizAttempts, UserQuizzes, Questions, QuestionAttempts], safe=True)
+    DATABASE.create_tables([User,
+                            Students,
+                            Quizzes,
+                            TeacherQuizzes,
+                            QuizAttempts,
+                            UserQuizzes,
+                            AssignedQuizzes,
+                            Questions,
+                            QuestionAttempts
+                            ], safe=True)
     DATABASE.close()

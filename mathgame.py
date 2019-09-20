@@ -354,22 +354,23 @@ def startcustomquiz():
 def startsavedquiz(saved_quiz_id):
     # Currently this does not allow you to retake the exact same questions
     # Need to fix question view to do that
-    basic_info = models.UserQuizzes.get(models.UserQuizzes.id == saved_quiz_id)
-    base = models.Quizzes.get(models.Quizzes.id == saved_quiz_id)
+    print("STARTING QUIZ NUMBER {}".format(saved_quiz_id))
+    quiz_info = models.UserQuizzes.get(models.UserQuizzes.quiz_id == saved_quiz_id)
+    base_quiz = models.Quizzes.get(models.Quizzes.id == saved_quiz_id)
     current_user_score = models.QuizAttempts.create(user_id=current_user.id,
                                                     quiz_id=saved_quiz_id,
-                                                    quiz_type=base.math_op,
+                                                    quiz_type=base_quiz.math_op,
                                                     questions_correct=0,
                                                     questions_wrong=0,
-                                                    questions_total=base.quiz_length,
+                                                    questions_total=base_quiz.quiz_length,
                                                     date_taken=datetime.now()
                                                     )
-    session['current_quiz_id'] = base.id
-    session['current_facts'] = base.quiz_length
-    session['current_quiz'] = base.math_op
+    session['current_quiz_id'] = base_quiz.id
+    session['current_facts'] = base_quiz.quiz_length
+    session['current_quiz'] = base_quiz.math_op
     session['current_qstn_type'] = 'Equation'
-    session['current_end_start'] = [base.starting_num, base.ending_num]
-    session['current_quiz_desc'] = basic_info.quiz_name
+    session['current_end_start'] = [base_quiz.starting_num, base_quiz.ending_num]
+    session['current_quiz_desc'] = quiz_info.quiz_name
     session['previous_questions'] = []
     session['current_num_correct'] = 0
     session['current_num_incorrect'] = 0
@@ -460,6 +461,59 @@ def checkanswer():
 @teacher_required
 def teacher():
     return render_template('teacher.html')
+
+
+@app.route('/saveteacherquiz', methods=['GET', 'POST'])
+@login_required
+@teacher_required
+def saveteacherquiz():
+    student_list = models.Students.select().where(models.Students.teacher_id == current_user.id)
+    if request.form:
+
+        l = request.form.to_dict()
+        assigned_to = []
+        for k,v in l.items():
+            if v == 'on':
+                assigned_to.append(k)
+
+        nq = request.form
+        nq_desc = nq['test-name']
+        nq_op = nq['fact-type']
+        nq_length = int(nq['number-questions'])
+
+        if nq['start-num'] != '':
+            nq_start = int(nq['start-num'])
+        else:
+            nq_start = 0
+
+        if nq['end-num'] != '':
+            nq_end = int(nq['end-num'])
+        else:
+            nq_end = 10
+
+        new_quiz = models.Quizzes(math_op=nq_op,
+                                  starting_num=nq_start,
+                                  ending_num=nq_end,
+                                  allow_neg_answers=False,
+                                  quiz_length=nq_length
+                                  )
+        new_quiz.save()
+
+        models.TeacherQuizzes.create(teacher_id=current_user.id,
+                                     quiz_name=nq_desc,
+                                     quiz_id=new_quiz.id
+                                     )
+
+        for student in assigned_to:
+            models.AssignedQuizzes.create(user_id=student,
+                                          quiz_id=new_quiz.id,
+                                          assigned_by=current_user.id
+                                          )
+        flash('Quiz saved.')
+        return redirect(url_for('teacher'))
+    else:
+        return render_template('teacherquiz.html',
+                               student_list=student_list)
 
 
 @app.route('/admin', methods=['GET', 'POST'])

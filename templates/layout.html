@@ -10,7 +10,7 @@
 
 <body>
 <header>
-    {% if current_user.is_authenticated and not current_user.is_admin %}
+    {% if current_user.is_authenticated and current_user.is_student %}
         <div class="container-fluid" id="navbar">
             <nav class="navbar fixed-top navbar-dark bg-info">
               <a class="navbar-brand" href="{{ url_for('index') }}">Math Game!</a>
@@ -38,7 +38,7 @@
                 </ul>
             </nav>
         </div>
-    {% elif current_user.is_authenticated and current_user.is_admin %}
+    {% elif current_user.is_authenticated and not current_user.is_student %}
         <div class="container-fluid" id="navbar">
             <nav class="navbar fixed-top navbar-dark bg-info">
               <a class="navbar-brand" href="{{ url_for('index') }}">Math Game!</a>

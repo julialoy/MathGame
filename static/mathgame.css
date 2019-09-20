@@ -160,9 +160,10 @@ body {
   margin-top: 10rem;
 }
 
-/* CUSTOM QUIZ FORM */
+/* CUSTOM/TEACHER QUIZ FORM */
 
-#custom-quiz-form {
+#custom-quiz-form,
+#equation-form{
   margin-top: 5rem;
 }
 
@@ -188,6 +189,14 @@ body {
   font-size: 1.25rem;
   font-weight: bold;
   color: #17a2b8;
+}
+
+/* TEACHER VIEW */
+#teacher-quiz-dropdown,
+#teacher-student-list,
+#teacher-add-student,
+#teacher-assign-quiz {
+  margin: 2rem;
 }
 
 /* ADMIN VIEW */
