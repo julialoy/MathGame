@@ -74,11 +74,27 @@
             <p>You aren't taking a quiz right now!</p>
         {% endif %}
 
-        <ul>
-        {% for quiz in quiz_list %}
-            <li><a href="{{ url_for('startsavedquiz', saved_quiz_id=quiz.quiz_id) }}">{{ quiz.quiz_name }}</a></li>
-        {% endfor %}
-        </ul>
+        {% if quiz_list %}
+            <p>{{ current_user.username }}'s Quizzes:</p>
+            <ul>
+            {% for quiz in quiz_list %}
+                <li><a href="{{ url_for('startsavedquiz', saved_quiz_id=quiz.quiz_id) }}">{{ quiz.quiz_name }}</a></li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>You haven't created any quizzes yet!</p>
+        {% endif %}
+
+        {% if assigned_quizzes %}
+            <p>Assigned Quizzes:</p>
+            <ul>
+                {% for assigned in assigned_quizzes %}
+                    <li><a href="{{ url_for('startsavedquiz', saved_quiz_id=assigned.quiz_id) }}">{{ assigned.quiz_name }}</a></li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>You have no assigned quizzes.</p>
+        {% endif %}
     </div>
 </div>
 

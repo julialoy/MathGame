@@ -192,10 +192,18 @@ def index():
         selected_user = models.User.get(models.User.id == current_user.id)
         user_quizzes = (models.UserQuizzes.select()
                         .where(models.UserQuizzes.user_id == current_user.id))
+        assigned_quizzes = (models.TeacherQuizzes.select()
+                            .join(models.AssignedQuizzes, on=(models.TeacherQuizzes.quiz_id == models.AssignedQuizzes.quiz_id))
+                            .where(models.AssignedQuizzes.user_id == current_user.id))
+
+        for assignment in assigned_quizzes:
+            print(assignment)
+
         quiz_list = user_quizzes[:5]
         return render_template('index.html',
                                selected_user=selected_user,
-                               quiz_list=quiz_list
+                               quiz_list=quiz_list,
+                               assigned_quizzes=assigned_quizzes
                                )
 
 
@@ -459,7 +467,12 @@ def checkanswer():
 @login_required
 @teacher_required
 def teacher():
-    return render_template('teacher.html')
+    student_list = (models.User.select(models.User)
+                    .join(models.Students, on=(models.User.id == models.Students.user_id))
+                    .where(models.Students.teacher_id == current_user.id)
+                    )
+    return render_template('teacher.html',
+                           student_list=student_list)
 
 
 @app.route('/addstudent', methods=['GET', 'POST'])

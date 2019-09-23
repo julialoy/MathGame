@@ -257,3 +257,8 @@ $('#remove-pic').click( evt => {
 $('#teacher-add-student').click( evt => {
     $('#addStudentModal').modal('show');
 });
+
+//Make Student List button show the student list
+$('#teacher-student-list').click( evt => {
+    $('#studentListModal').modal('show');
+});
