@@ -58,12 +58,12 @@ class Students(BaseModel):
 
 
 class Quizzes(BaseModel):
-    # quiz_name = CharField(max_length=250, unique=True)
     math_op = CharField(default='+')
     starting_num = IntegerField(default=0)
     ending_num = IntegerField(default=10)
     allow_neg_answers = BooleanField(default=False)
     quiz_length = IntegerField(default=-1)
+    quiz_type = CharField(default='Equation')
 
 
 class TeacherQuizzes(BaseModel):

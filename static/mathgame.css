@@ -160,14 +160,16 @@ body {
   margin-top: 10rem;
 }
 
-/* CUSTOM/TEACHER QUIZ FORM */
+/* CUSTOM/TEACHER/NUMBER BOND QUIZ FORM */
 
 #custom-quiz-form,
-#equation-form{
+#number-bond-form,
+#equation-form {
   margin-top: 5rem;
 }
 
-.quiz-setup {
+.quiz-setup,
+.number-bond-setup {
   padding: 2rem;
   background-color: lightgrey;
   border-radius: 25px;

@@ -1,121 +1,39 @@
 //Store some info about the session
 const userSessionStorage = window.sessionStorage;
 
-//Split string on mathematical operator
-const splitOnOperator = (myString) => {
-  if (myString.includes('+')) {
-    const splitNum = myString.split(" + ");
-    return splitNum;
-  } else if (myString.includes('-')) {
-    const splitNum = myString.split(" - ");
-    return splitNum;
-  } else if (myString.includes('*')) {
-    const splitNum = myString.split(" * ");
-    return splitNum;
-  }
-};
+//Get and display equation quiz question
+//const getEquationQuestion = () => {
+//    $.ajax({url:"/question", dataType:"json"}).then( data => {
+//      emptyTenframe();
+//      if (data.question === "You haven't started a quiz!" || data.question === "End of Quiz!") {
+//        $('#quiz-question').append(`<h3>${data.question}</h3>`);
+//        $('#user-answer').hide();
+//        $('#submit-answer-button').hide();
+//        $('#show-tenframe').hide();
+//        //$('#answer-tenframe').hide();
+//      } else {
+//        $('#quiz-question').append(`<h3>${data.question} = ?</h3>`);
+//        $('#get-next-btn').hide();
+//        const quizNumbers = splitOnOperator($.trim($('#quiz-question').text()).split(" = ")[0]);
+//        if (useTenframes(quizNumbers, data.question) === false) {
+//          $('#show-tenframe').hide();
+//         // $('#answer-tenframe').hide();
+//        }
+//      }
+//    });
+//};
 
-//Check whether to use ten frames
-const useTenframes = (numbers, qst) => {
-  if (qst.includes('*')) {
-    const tenFrame = false;
-    return tenFrame;
-  } else if (qst.includes('/')) {
-    const tenFrame = false;
-    return tenFrame;
-  }
-
-  if (numbers[0] < 11 && numbers[1] < 11) {
-    const tenFrame = true;
-    return tenFrame;
-  } else {
-    const tenFrame = false;
-    return tenFrame;
-  }
-};
-
-//Fill two ten frames per the current quiz question
-const fillTenframe = (numbers, qst) => {
-  if (useTenframes(numbers, qst) === true) {
-      const numOneText = document.getElementById('num-one');
-      const numTwoText = document.getElementById('num-two');
-      const tableOne = document.getElementById('tenframe-table-one');
-      const tableTwo = document.getElementById('tenframe-table-two');
-      const tableOneCells = tableOne.getElementsByTagName("td");
-      const tableTwoCells = tableTwo.getElementsByTagName("td");
-
-      for (i = 0; i < parseInt(numbers[0]); i++) {
-        const redSphereOne = tableOneCells[i].firstChild;
-        redSphereOne.setAttribute("style", "background-color:#17a2b8");
-      }
-      numOneText.append(numbers[0]);
-
-      for (i = 0; i <parseInt(numbers[1]); i++) {
-        const redSphereTwo = tableTwoCells[i].firstChild;
-        redSphereTwo.setAttribute("style", "background-color:#17a2b8");
-      }
-      numTwoText.append(numbers[1]);
-  } else {
-    $('#show-tenframe').hide();
-    //$('#answer-tenframe').hide();
-  }
-};
-
-//Change to two empty ten frames
-const emptyTenframe = () => {
-  const tableOne = document.getElementById('tenframe-table-one');
-  const tableTwo = document.getElementById('tenframe-table-two');
-  const tableOneCells = tableOne.getElementsByTagName("td");
-  const tableTwoCells = tableTwo.getElementsByTagName("td");
-  for (i = 0; i < 10; i++) {
-    const redSphereOne = tableOneCells[i].firstChild;
-    const redSphereTwo = tableTwoCells[i].firstChild;
-    redSphereOne.setAttribute("style", "background-color:#212529");
-    redSphereTwo.setAttribute("style", "background-color:#212529");
-  }
-  $('#num-one').empty();
-  $('#num-two').empty();
-};
-
-//Get the next quiz question
-const nextQuestion = () => {
-  $('#game-container').css("background-color", "lightgrey");
-  $('#quiz-question').empty();
-  $('#quiz-answer').empty();
-  $('#quiz-question').show();
-  $('#user-answer').show();
-  $('#submit-answer-button').show();
-  emptyTenframe();
-  $('#show-tenframe').html('Show Ten Frame');
-  $.ajax({url:"/question", dataType:"json"}).then( data => {
-    $('#get-next-btn').hide();
-    if (data.question === "You haven't started a quiz!") {
-      $('#quiz-question').append(`<h3>${data.question}</h3>`)
-      $('#user-answer').hide();
-      $('#submit-answer-button').hide();
-      $('#show-tenframe').hide();
-      //$('#answer-tenframe').hide();
-    } else if (data.question === "End of Quiz!") {
-      $('#quiz-question').append(`<h3>${data.question}</h3>`)
-      $('#user-answer').hide();
-      $('#submit-answer-button').hide();
-      $('#show-tenframe').hide();
-      //$('#answer-tenframe').hide();
-      $('#quiz-question').append(`<p>You answered ${data.current_correct} questions correctly!</p>`);
-      $('#quiz-question').append(`<p>You answered ${data.current_incorrect} questions incorrectly.</p>`);
-    } else {
-      $("#quiz-question").append(`<h3>${data.question} = ?</h3>`);
-      const quizNumbers = splitOnOperator($.trim($('#quiz-question').text()).split(" = ")[0]);
-      if (useTenframes(quizNumbers, data.question) === true) {
-        $('#show-tenframe').show();
-        //$('#answer-tenframe').show();
-      } else {
-        $('#show-tenframe').hide();
-        //$('#answer-tenframe').hide();
-      }
-    };
-  });
-  $('#user-answer-text').focus();
+//Get and display number bond quiz question
+const getNumberBondQuestion = () => {
+    $.ajax({url:"/numberbond", dataType:"json"}).then( data => {
+        console.log("NUMBER BOND DATA: ", data.question, data.quiz_type);
+        if (data.question === "You haven't started a quiz!" || data.question === "End of Quiz!") {
+            $('#quiz-question').append(`<h3>${data.question}</h3>`);
+        } else {
+            console.log("NUMBER BOND QUESTION: ", data.question);
+            $('#base-number').append(`<h3>${data.question}</h3>`);
+        }
+    });
 };
 
 //Detect user touch
@@ -125,24 +43,17 @@ const nextQuestion = () => {
 //  window.removeEventListener('touchstart', onFirstTouch, false);
 //}, false);
 
-//Get and display quiz question
-$.ajax({url:"/question", dataType:"json"}).then( data => {
-  emptyTenframe();
-  if (data.question === "You haven't started a quiz!" || data.question === "End of Quiz!") {
-    $('#quiz-question').append(`<h3>${data.question}</h3>`);
-    $('#user-answer').hide();
-    $('#submit-answer-button').hide();
-    $('#show-tenframe').hide();
-    //$('#answer-tenframe').hide();
-  } else {
-    $('#quiz-question').append(`<h3>${data.question} = ?</h3>`);
-    $('#get-next-btn').hide();
-    const quizNumbers = splitOnOperator($.trim($('#quiz-question').text()).split(" = ")[0]);
-    if (useTenframes(quizNumbers, data.question) === false) {
-      $('#show-tenframe').hide();
-     // $('#answer-tenframe').hide();
-    }
+$.ajax({url:"/checkquiztype", dataType:"json"}).then( data => {
+  if (data.quiz_type === null) {
+    $('#quiz-message').append(`<h3>${data.question}</h3>`);
   }
+//  else if (data.quiz_type === 'Equation') {
+//    getEquationQuestion();
+//  } else if (data.quiz_type === 'Number Bonds') {
+//    getNumberBondQuestion();
+//  } else {
+//    $('#quiz-message').append(`<h3>Something went wrong</h3>`);
+//  }
 });
 
 //Check user's password
@@ -186,61 +97,73 @@ $('#quiz-setup-form').submit( evt => {
 
 //Submit user's answer to quiz question
 //Display "correct" or "wrong" feedback for question answer
-$('#user-answer').submit( evt => {
-  evt.preventDefault();
-  $('#show-tenframe').hide();
-  const url = $(evt.target).attr('action');
-  const question = $('h3').text().slice(0, -4);
-  const userAnswer = $('#user-answer-text').val();
-  $.ajax(url, {
-    dataType: "json",
-    data: {"question": question, "userAnswer": userAnswer},
-    type: "POST",
-  }).then( data => {
-    if (data.answer === "Try again! Please enter a number.") {
-      $('#quiz-answer').empty();
-      $("#quiz-answer").append(data.answer);
-      $('#user-answer-text').val("");
-    } else if (data.answer === "CORRECT!") {
-      $('#game-container').css("background-color", "mediumseagreen");
-      $('#quiz-question').hide();
-      $('#quiz-answer').empty();
-      $("#quiz-answer").append(`<h3>${data.answer} ${question} = ${userAnswer}.</h3>`);
-      $('#user-answer').hide();
-      $('#submit-answer-button').hide();
-      $('#user-answer-text').val("");
-      $('#tenframes').prop('hidden', true);
-      //$('#answer-tenframe').hide();
-      setTimeout(nextQuestion, 2000);
-    } else if (data.answer === "Sorry! That's not the right answer.") {
-      $('#game-container').css("background-color", "indianred");
-      $('#quiz-question').hide();
-      $('#quiz-answer').empty();
-      $("#quiz-answer").append(`<h3>${data.answer} ${question} does not equal ${userAnswer}.</h3>`);
-      $('#user-answer').hide();
-      $('#submit-answer-button').hide();
-      $('#user-answer-text').val("");
-      $('#tenframes').prop('hidden', true);
-      //$('#answer-tenframe').hide();
-      setTimeout(nextQuestion, 2000);
-    }
-  });
-});
+//$('#user-answer-equation').submit( evt => {
+//  evt.preventDefault();
+//  $('#show-tenframe').hide();
+//  const url = $(evt.target).attr('action');
+//  const question = $('h3').text().slice(0, -4);
+//  const userAnswer = $('#user-answer-text').val();
+//  $.ajax(url, {
+//    dataType: "json",
+//    data: {"question": question, "userAnswer": userAnswer},
+//    type: "POST",
+//  }).then( data => {
+//    if (data.answer === "Try again! Please enter a number.") {
+//      $('#quiz-answer').empty();
+//      $("#quiz-answer").append(data.answer);
+//      $('#user-answer-text').val("");
+//    } else if (data.answer === "CORRECT!") {
+//      $('#game-container').css("background-color", "mediumseagreen");
+//      $('#quiz-question').hide();
+//      $('#quiz-answer').empty();
+//      $("#quiz-answer").append(`<h3>${data.answer} ${question} = ${userAnswer}.</h3>`);
+//      $('#user-answer-equation').hide();
+//      $('#submit-answer-button').hide();
+//      $('#user-answer-text').val("");
+//      $('#tenframes').prop('hidden', true);
+//      //$('#answer-tenframe').hide();
+//      setTimeout(nextQuestion, 2000);
+//    } else if (data.answer === "Sorry! That's not the right answer.") {
+//      $('#game-container').css("background-color", "indianred");
+//      $('#quiz-question').hide();
+//      $('#quiz-answer').empty();
+//      $("#quiz-answer").append(`<h3>${data.answer} ${question} does not equal ${userAnswer}.</h3>`);
+//      $('#user-answer-equation').hide();
+//      $('#submit-answer-button').hide();
+//      $('#user-answer-text').val("");
+//      $('#tenframes').prop('hidden', true);
+//      //$('#answer-tenframe').hide();
+//      setTimeout(nextQuestion, 2000);
+//    }
+//  });
+//});
 
-//Show and hide the ten frame for the current quiz question when button clicked
-$('#show-tenframe').click( evt => {
-  const quizQuestion = $('#quiz-question').text()
-  const quizNumbers = splitOnOperator($.trim($('#quiz-question').text()).split(" = ")[0]);
-  const tenframeBtn = $(evt.target);
-  const btnText = tenframeBtn.text();
-  if (btnText === 'Show Ten Frame') {
-    $('#tenframes').prop('hidden', false);
-    $('#show-tenframe').html('Hide Ten Frame');
-    fillTenframe(quizNumbers, quizQuestion);
-  } else if (btnText === 'Hide Ten Frame') {
-    $('#tenframes').prop('hidden', true);
-    $('#show-tenframe').html('Show Ten Frame');
-  }
+$('#user-answer-number-bond').submit( evt => {
+    evt.preventDefault();
+    console.log("CHECK BOND");
+    const url = $(evt.target).attr('action');
+    const base = $('#base-number').text();
+    const userBondOne = $('#user-answer-bond-1').val();
+    const userBondTwo = $('#user-answer-bond-2').val();
+    console.log(userBondOne, userBondTwo)
+    $.ajax(url, {
+        dataType: "json",
+        data: {"base": base, "userBondOne": userBondOne, "userBondTwo": userBondTwo},
+        type: "POST",
+    }).then( data => {
+        if (data.answer === "Try again! Please enter a number.") {
+            $('#base-number').empty();
+            $('#base-number').append(data.answer);
+            $('#user-answer-bond-1').val("");
+            $('#user-answer-bond-2').val("");
+        } else if (data.answer === "CORRECT!") {
+            $('#game-container').css("background-color", "mediumseagreen");
+            $('#base-number').hide();
+            $('#user-answer-bond-1').hide();
+            $('#user-answer-bond-2').hide();
+            $('#submit-bond-button').hide();
+        }
+    })
 });
 
 //Make profile image show profile pic modal
@@ -262,3 +185,4 @@ $('#teacher-add-student').click( evt => {
 $('#teacher-student-list').click( evt => {
     $('#studentListModal').modal('show');
 });
+
